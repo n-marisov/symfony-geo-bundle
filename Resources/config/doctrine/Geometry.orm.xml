@@ -30,7 +30,7 @@
         <embedded name="bound" class="Maris\Symfony\Geo\Entity\Bound" column-prefix="bbox_" />
 
         <!-- Круг описанный вокруг фигуры -->
-        <embedded name="bound" class="Maris\Symfony\Geo\Entity\Circle" column-prefix="circle_" />
+        <embedded name="circle" class="Maris\Symfony\Geo\Entity\Circle" column-prefix="circle_" />
 
         <!-- Список точек фигуры -->
         <one-to-many field="coordinates" target-entity="Maris\Symfony\Geo\Entity\Location" mapped-by="geometry">
