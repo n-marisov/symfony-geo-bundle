@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Exception;
 use Maris\Symfony\Geo\Interfaces\GeometryInterface;
+use Maris\Symfony\Geo\Toll\Circle;
 use Traversable;
 
 /***

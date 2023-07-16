@@ -1,7 +1,9 @@
 <?php
 
-namespace Maris\Symfony\Geo\Entity;
+namespace Maris\Symfony\Geo\Toll;
 
+use Maris\Symfony\Geo\Entity\Geometry;
+use Maris\Symfony\Geo\Entity\Location;
 use Maris\Symfony\Geo\Interfaces\DistanceCalculatorInterface;
 use Maris\Symfony\Geo\Service\Haversine;
 
