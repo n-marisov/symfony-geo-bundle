@@ -1,0 +1,10 @@
+services:
+
+   # конфигурация для сервисов по умолчанию в *этом* файле
+   _defaults:
+      autowire: true      # Автоматически внедряет зависимости в ваши сервисы.
+      autoconfigure: true # Автоматически регистрирует ваши сервисы как команды, подписчики событий и т.д.
+
+   Maris\Symfony\Geo\:
+      resource: '../../src/'
+      exclude: '../../src/{DependencyInjection,Entity,Interfaces,Serialize}'
