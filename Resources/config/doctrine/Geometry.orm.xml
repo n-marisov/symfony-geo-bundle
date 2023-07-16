@@ -27,7 +27,7 @@
         </id>
 
         <!-- Границы геометрической фигуры -->
-        <embedded name="bound" class="Maris\Symfony\Geo\Entity\Bound" column-prefix="bbox_" />
+        <embedded name="bound" class="Maris\Symfony\Geo\Entity\Bounds" column-prefix="bbox_" />
 
         <!-- Круг описанный вокруг фигуры -->
         <embedded name="circle" class="Maris\Symfony\Geo\Entity\Circle" column-prefix="circle_" />

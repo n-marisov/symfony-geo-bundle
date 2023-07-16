@@ -4,7 +4,7 @@
                           https://symfony.com/schema/dic/doctrine/doctrine-1.0.xsd">
 
     <!-- Ограничивающая рамка -->
-    <embeddable name="Maris\Symfony\Geo\Entity\Bound" >
+    <embeddable name="Maris\Symfony\Geo\Entity\Bounds" >
         <field name="north" type="decimal" precision="8" scale="6" />
         <field name="west" type="decimal" precision="9" scale="6" />
         <field name="south" type="decimal" precision="8" scale="6" />
