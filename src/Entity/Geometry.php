@@ -2,13 +2,15 @@
 
 namespace Maris\Symfony\Geo\Entity;
 
-
-
+use ArrayAccess;
+use Countable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Exception;
 use Maris\Symfony\Geo\Interfaces\GeometryInterface;
+use Maris\Symfony\Geo\Service\GeoCalculator;
 use Maris\Symfony\Geo\Toll\Circle;
+use ReflectionException;
 use Traversable;
 
 /***
@@ -18,7 +20,7 @@ use Traversable;
  * Функция json_encode() всегда возвращает свойство 'geometry'
  * GeoJson спецификации RFC 7946 представление географической точки.
  */
-abstract class Geometry implements GeometryInterface
+abstract class Geometry implements GeometryInterface, Countable, ArrayAccess
 {
     /**
      * ID в базе данных
@@ -56,7 +58,7 @@ abstract class Geometry implements GeometryInterface
     public function __construct()
     {
         $this->coordinates = new ArrayCollection();
-        $this->bounds = Bounds::create( $this );
+        $this->bounds = Bounds::createFromGeometry( $this );
         $this->circle = Circle::create( $this );
     }
 
@@ -70,7 +72,7 @@ abstract class Geometry implements GeometryInterface
      */
     public function getBounds(): Bounds
     {
-        return $this->bounds ?? $this->bounds = Bounds::create( $this );
+        return $this->bounds ?? $this->bounds = Bounds::createFromGeometry( $this );
     }
 
     /**
@@ -132,4 +134,86 @@ abstract class Geometry implements GeometryInterface
      * @inheritDoc
      */
     abstract public function jsonSerialize(): array;
-}
+
+    /***
+     * Упрощает текущую геометрию.
+     * @param GeoCalculator $calculator
+     * @param float|null $distance
+     * @param float|null $bearing
+     * @return $this
+     * @throws ReflectionException
+     */
+    public function simplify( GeoCalculator $calculator , ?float $distance = null, ?float $bearing = null ):static
+    {
+        $instance = $calculator->simplify( $this, $distance, $bearing);
+        $this->coordinates = $instance->coordinates;
+        $this->bounds->calculate($this);
+        return $this;
+    }
+
+    /***
+     * Возвращает количество точек в фигуре
+     * @return int
+     */
+    public function count(): int
+    {
+        return $this->coordinates->count();
+    }
+
+    /**
+     * @internal
+     * @param int $offset
+     * @return bool
+     */
+     public function offsetExists(mixed $offset): bool
+     {
+         return $this->coordinates->offsetExists($offset);
+     }
+
+    /**
+     * @internal
+     * @param int $offset
+     * @return Location|null
+     */
+     public function offsetGet(mixed $offset): ?Location
+     {
+         return $this->coordinates->offsetGet( $offset );
+     }
+
+    /**
+     * @internal
+     * @param int $offset
+     * @param Location $value
+     * @return void
+     */
+     public function offsetSet(mixed $offset, mixed $value): void
+     {
+         # Проверяем что ключ целое число и значение координата
+         if( !is_numeric($offset) || !ctype_digit($offset) || !is_a($value,Location::class))
+             return;
+
+         $this->coordinates->offsetSet(
+             ($this->coordinates->count() < $offset) ? $this->coordinates->count() : $offset,
+             $value
+         );
+     }
+
+    /**
+     * @internal
+     * @param int $offset
+     * @return void
+     */
+     public function offsetUnset( mixed $offset ): void
+     {
+         $this->coordinates->offsetUnset($offset);
+     }
+
+    /***
+     * Приводит объект к массиву
+     * @return array
+     */
+     public function toArray():array
+     {
+         return $this->coordinates->toArray();
+     }
+ }

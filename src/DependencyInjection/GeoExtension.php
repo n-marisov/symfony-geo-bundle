@@ -2,6 +2,9 @@
 
 namespace Maris\Symfony\Geo\DependencyInjection;
 
+use Maris\Symfony\Geo\Entity\Location;
+use Maris\Symfony\Geo\Service\SphericalCalculator;
+use Maris\Symfony\Geo\Toll\Ellipsoid;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
@@ -18,5 +21,7 @@ class GeoExtension extends Extension
         $path = realpath( dirname(__DIR__).'/../Resources/config' );
         $loader = new YamlFileLoader( $container, new FileLocator( $path ) );
         $loader->load('services.yaml');
+
+        $container->setParameter("geo.ellipsoid",Ellipsoid::WGS_84);
     }
 }

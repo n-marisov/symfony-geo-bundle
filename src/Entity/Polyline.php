@@ -3,8 +3,8 @@
 namespace Maris\Symfony\Geo\Entity;
 
 use Exception;
-use Maris\Symfony\Geo\Interfaces\DistanceCalculatorInterface;
-use Maris\Symfony\Geo\Service\Haversine;
+use Maris\Symfony\Geo\Service\GeoCalculator;
+use Maris\Symfony\Geo\Service\SphericalCalculator;
 
 /**
  * Ломаная линия состоящая из двух и более точек.
@@ -18,11 +18,11 @@ class Polyline extends Geometry
 {
     /**
      * Возвращает длину линии в метрах.
-     * @param DistanceCalculatorInterface $calculator
+     * @param GeoCalculator $calculator
      * @return float
      * @throws Exception
      */
-    public function getDistance( DistanceCalculatorInterface $calculator = new Haversine() ):float
+    public function getDistance( GeoCalculator $calculator = new SphericalCalculator() ):float
     {
         $distance = 0.0;
         $start = null;
@@ -34,6 +34,7 @@ class Polyline extends Geometry
         }
         return $distance;
     }
+
     /**
      * @inheritDoc
      * @return array{type:string, coordinates:float[][] }

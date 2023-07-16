@@ -4,8 +4,8 @@ namespace Maris\Symfony\Geo\Toll;
 
 use Maris\Symfony\Geo\Entity\Geometry;
 use Maris\Symfony\Geo\Entity\Location;
-use Maris\Symfony\Geo\Interfaces\DistanceCalculatorInterface;
-use Maris\Symfony\Geo\Service\Haversine;
+use Maris\Symfony\Geo\Service\GeoCalculator;
+use Maris\Symfony\Geo\Service\SphericalCalculator;
 
 /***
  * Круг на карте определенный центральной точкой и радиусом в метрах.
@@ -40,10 +40,10 @@ class Circle
     /***
      * Создает объект круга описанного вокруг фигуры.
      * @param Geometry $geometry
-     * @param DistanceCalculatorInterface $calculator
+     * @param GeoCalculator $calculator
      * @return Circle
      */
-    public static function create( Geometry $geometry ,DistanceCalculatorInterface $calculator = new Haversine()):Circle
+    public static function create( Geometry $geometry ,GeoCalculator $calculator = new SphericalCalculator()):Circle
     {
         $center = $geometry->getBounds()->getCenter();
         return new static(

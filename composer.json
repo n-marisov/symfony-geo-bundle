@@ -29,6 +29,7 @@
     }
   },
   "require-dev": {
-    "phpunit/phpunit": "*"
+    "phpunit/phpunit": "*",
+    "mjaschen/phpgeo": "*"
   }
 }

@@ -3,9 +3,14 @@
 namespace Maris\Symfony\Geo\Entity;
 
 use Exception;
-use Maris\Symfony\Geo\Interfaces\DistanceCalculatorInterface;
+use JsonSerializable;
 use Maris\Symfony\Geo\Interfaces\LocationInterface;
-use Maris\Symfony\Geo\Service\Haversine;
+use Maris\Symfony\Geo\Service\GeoCalculator;
+use Maris\Symfony\Geo\Service\SphericalCalculator;
+use Maris\Symfony\Geo\Toll\Cartesian;
+use Maris\Symfony\Geo\Toll\Ellipsoid;
+use Maris\Symfony\Geo\Toll\Orientation;
+use Stringable;
 
 /**
  * Сущность географической точки.
@@ -21,7 +26,7 @@ use Maris\Symfony\Geo\Service\Haversine;
  * Функция json_encode() всегда возвращает свойство 'geometry'
  * GeoJson спецификации RFC 7946 представление географической точки.
  */
-class Location implements LocationInterface
+class Location implements LocationInterface, Stringable, JsonSerializable
 {
     /**
      * ID в базе данных
@@ -184,6 +189,14 @@ class Location implements LocationInterface
     }
 
     /**
+     * Приводит объект к строке.
+     * @return string
+     */
+    public function __toString():string
+    {
+        return join(",",[ $this->latitude, $this->longitude ]);
+    }
+    /**
      * Возвращает true если текущая и переданная координата указывает на одну точку на карте.
      * @param Location $location
      * @return bool
@@ -197,11 +210,177 @@ class Location implements LocationInterface
      * Указывает что точки находятся на расстоянии не дальше $allowed.
      * @param Location $location
      * @param float $allowed
-     * @param DistanceCalculatorInterface $calculator
+     * @param GeoCalculator $calculator
      * @return bool
      */
-    public function sameLocation( Location $location, float $allowed = 0.001, DistanceCalculatorInterface $calculator = new Haversine() ):bool
+    public function sameLocation( Location $location, float $allowed = 0.001, GeoCalculator $calculator = new SphericalCalculator() ):bool
     {
         return $calculator->getDistance($this,$location) <= $allowed;
+    }
+
+
+    /**
+     * Определяет в какую сторону текущая точка разводит вектор из двух переданных точек.
+     * @param Location $lineStart Начало вектора.
+     * @param Location $lineEnd Направление вектора.
+     * @return Orientation
+     */
+    public function getOrientation( Location $lineStart, Location $lineEnd ):Orientation
+    {
+        return Orientation::fromFloat(
+            (($lineEnd->latitude - $lineStart->latitude) * ($this->longitude - $lineEnd->longitude))
+            - (($lineEnd->longitude - $lineStart->longitude) * ($this->latitude - $lineEnd->latitude))
+        );
+    }
+
+    /***
+     * Возвращает дистанцию по перпендикуляру к вектору образованному переданными точками.
+     * @param Location $lineStart
+     * @param Location $lineEnd
+     * @param Ellipsoid $ellipsoid
+     * @return float
+     */
+    public function getPerpendicularDistance(  Location $lineStart, Location $lineEnd ,Ellipsoid $ellipsoid ):float
+    {
+        $radius = $ellipsoid->r();
+
+        $cartesianFactory = function ( Location $location , float $radius ):Cartesian
+        {
+            $latitude = deg2rad( 90 - $location->getLatitude() );
+            $longitude = $location->getLongitude();
+            $longitude = deg2rad( ($longitude > 0) ? $longitude : $longitude + 360 );
+
+            return new Cartesian(
+                $radius * cos( $longitude ) * sin( $latitude ),
+                $radius * sin( $longitude ) * sin( $latitude ),
+                $radius * cos( $latitude )
+            );
+        };
+
+        $point = $cartesianFactory( $this, $radius );
+        $lineStart = $cartesianFactory( $lineStart, $radius );
+        $lineEnd = $cartesianFactory( $lineEnd, $radius );
+
+        $normalize = new Cartesian(
+            $lineStart->y * $lineEnd->z - $lineStart->z * $lineEnd->y,
+            $lineStart->z * $lineEnd->x - $lineStart->x * $lineEnd->z,
+            $lineStart->x * $lineEnd->y - $lineStart->y * $lineEnd->x
+        );
+
+
+        $length = sqrt($normalize->x ** 2 + $normalize->y ** 2 + $normalize->z ** 2 );
+
+        if ($length == 0.0) return 0;
+
+        $normalize->x /= $length;
+        $normalize->y /= $length;
+        $normalize->z /= $length;
+
+        $theta = $normalize->x * $point->x + $normalize->y * $point->y + $normalize->z * $point->z;
+
+        $length = sqrt($point->x ** 2 + $point->y ** 2 + $point->z ** 2 );
+
+        $theta /= $length;
+
+        $distance = abs((M_PI / 2) - acos($theta));
+
+        return $distance * $radius;
+    }
+
+    /**
+     * Создает координату из строки.
+     * Распознает координаты вида:
+     *  "52 12.345, 13 23.456","52° 12.345, 13° 23.456", "52° 12.345′, 13° 23.456′", "52 12.345 N, 13 23.456 E","N52° 12.345′ E13° 23.456′"
+     *  "52 12.345, 13 23.456","52° 12.345, 13° 23.456", "52° 12.345′, 13° 23.456′", "52 12.345 N, 13 23.456 E","N52° 12.345′ E13° 23.456′"
+     *  "65.5, 44.755544" или "46.42552 37.976"
+     *  "40.2S, 135.3485W" или "56.234°N, 157.245°W"
+     * @param string $location
+     * @return static|null
+     */
+    public static function fromString( string $location ):?static
+    {
+        /**
+         * Объединяем минуты и секунды.
+         */
+        $location = preg_replace_callback(
+            '/(\d+)(°|\s)\s*(\d+)(\'|′|\s)(\s*([0-9.]*))("|\'\'|″|′′)?/u',
+             function (array $matches): string {
+                return sprintf('%d %f', $matches[1], (float)$matches[3] + (float)$matches[6] / 60);
+            },
+            $location
+        );
+
+
+        # "52 12.345, 13 23.456","52° 12.345, 13° 23.456", "52° 12.345′, 13° 23.456′", "52 12.345 N, 13 23.456 E","N52° 12.345′ E13° 23.456′"
+        if (preg_match("/(-?\d{1,2})°?\s+(\d{1,2}\.?\d*)['′]?[, ]\s*(-?\d{1,3})°?\s+(\d{1,2}\.?\d*)['′]?/u", $location, $match) === 1) {
+            $latitude  = (int)$match[1] >= 0
+                ? (int)$match[1] + (float)$match[2] / 60
+                : (int)$match[1] - (float)$match[2] / 60;
+            $longitude = (int)$match[3] >= 0
+                ? (int)$match[3] + (float)$match[4] / 60
+                : (int)$match[3] - (float)$match[4] / 60;
+
+            return (is_numeric($latitude) && is_numeric($longitude))
+                ? new static((float)$latitude, (float)$longitude)
+                : null;
+        }
+
+        # "52 12.345, 13 23.456","52° 12.345, 13° 23.456", "52° 12.345′, 13° 23.456′", "52 12.345 N, 13 23.456 E","N52° 12.345′ E13° 23.456′"
+        elseif (preg_match("/([NS]?\s*)(\d{1,2})°?\s+(\d{1,2}\.?\d*)['′]?(\s*[NS]?)[, ]\s*([EW]?\s*)(\d{1,3})°?\s+(\d{1,2}\.?\d*)['′]?(\s*[EW]?)/ui", $location, $match) === 1) {
+            $latitude = (int)$match[2] + (float)$match[3] / 60;
+            if (strtoupper(trim($match[1])) === 'S' || strtoupper(trim($match[4])) === 'S') {
+                $latitude = - $latitude;
+            }
+            $longitude = (int)$match[6] + (float)$match[7] / 60;
+            if (strtoupper(trim($match[5])) === 'W' || strtoupper(trim($match[8])) === 'W') {
+                $longitude = - $longitude;
+            }
+            return (is_numeric($latitude) && is_numeric($longitude))
+                ? new static((float)$latitude, (float)$longitude)
+                : null;
+        }
+         # "65.5, 44.755544" или "46.42552 37.976"
+        elseif (preg_match('/(-?\d{1,2}\.?\d*)°?[, ]\s*(-?\d{1,3}\.?\d*)°?/u', $location, $match) === 1) {
+
+            return (is_numeric($match[1]) && is_numeric($match[2]))
+                ? new static((float)$match[1], (float)$match[2])
+                : null;
+        }
+
+        #"40.2S, 135.3485W" или "56.234°N, 157.245°W"
+        elseif (preg_match("/([NS]?\s*)(\d{1,2}\.?\d*)°?(\s*[NS]?)[, ]\s*([EW]?\s*)(\d{1,3}\.?\d*)°?(\s*[EW]?)/ui", $location, $match) === 1) {
+            $latitude = $match[2];
+            if (strtoupper(trim($match[1])) === 'S' || strtoupper(trim($match[3])) === 'S') {
+                $latitude = - $latitude;
+            }
+            $longitude = $match[5];
+            if (strtoupper(trim($match[4])) === 'W' || strtoupper(trim($match[6])) === 'W') {
+                $longitude = - $longitude;
+            }
+
+            return (is_numeric($latitude) && is_numeric($longitude))
+                ? new static((float)$latitude, (float)$longitude)
+                : null;
+        }
+        return null;
+    }
+
+    /**
+     * Создает объект координаты из массива
+     * @param float[]|array{string:float} $location
+     * @return $this|null
+     */
+    public static function fromJson( array $location ):?static
+    {
+        foreach ( $location as $key => $value )
+            if(in_array($key,[1,"lat","latitude"]) && is_numeric($value))
+                $latitude = (float) $value;
+            elseif(in_array($key,[0,"lon","long","longitude"]) && is_numeric($value))
+                $longitude = (float) $value;
+
+        if(isset($latitude) && isset($longitude))
+            return new static($latitude, $longitude);
+
+        return null;
     }
 }

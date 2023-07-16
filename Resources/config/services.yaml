@@ -7,4 +7,12 @@ services:
 
    Maris\Symfony\Geo\:
       resource: '../../src/'
-      exclude: '../../src/{DependencyInjection,Entity,Interfaces,Serialize}'
+      exclude: '../../src/{DependencyInjection,Entity,Interfaces}'
+
+   Maris\Symfony\Geo\Service\SphericalCalculator:
+      arguments:
+         $ellipsoid: '%geo.ellipsoid%'
+
+   Maris\Symfony\Geo\Service\EllipsoidalCalculator:
+      arguments:
+         $ellipsoid: '%geo.ellipsoid%'

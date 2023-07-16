@@ -3,6 +3,7 @@
 namespace Maris\Symfony\Geo\Entity;
 
 use JsonSerializable;
+use Maris\Symfony\Geo\Service\GeoCalculator;
 
 /**
  * Ограничивающая рамка.
@@ -49,23 +50,6 @@ class Bounds implements JsonSerializable
         $this->south = $south;
         $this->east = $east;
     }
-
-    /**
-     * @param Geometry $geometry
-     */
-
-
-    /**
-     * Создает объект границ из геометрии
-     * @param Geometry $geometry
-     * @return Bounds
-     */
-    public static function create( Geometry $geometry ):Bounds
-    {
-        return (new static())->calculate( $geometry );
-    }
-
-
 
     /**
      * Устанавливает все значения на минимум
@@ -239,5 +223,38 @@ class Bounds implements JsonSerializable
     public function jsonSerialize(): array
     {
         return [$this->north, $this->west, $this->south, $this->east];
+    }
+
+    /**
+     * Создает объект границ из центральной точки и длинны диагонали в метрах.
+     * @param Location $center
+     * @param float $diagonal
+     * @param GeoCalculator $calculator
+     * @return static
+     */
+    public static function createFromCenter( Location $center, float $diagonal, GeoCalculator $calculator ):static
+    {
+        $instance = new static();
+
+        $diagonal /= 2;
+        $northWest = $calculator->getDestination($center, 315, $diagonal);
+        $southEast = $calculator->getDestination($center, 135, $diagonal);
+
+        $instance->north = $northWest->getLatitude();
+        $instance->west = $northWest->getLongitude();
+        $instance->south = $southEast->getLatitude();
+        $instance->east = $southEast->getLongitude();
+
+        return $instance;
+    }
+
+    /**
+     * Создает объект границ из геометрии
+     * @param Geometry $geometry
+     * @return Bounds
+     */
+    public static function createFromGeometry(Geometry $geometry ):Bounds
+    {
+        return (new static())->calculate( $geometry );
     }
 }
