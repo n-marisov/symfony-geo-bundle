@@ -294,7 +294,7 @@ abstract class GeoCalculator
                 $p[$j]->getLatitude(),
                 $p[$j]->getLongitude()
             );
-            if($b->contains($l) && $l->getPerpendicularDistance( $p[$i], $p[$j], $this->ellipsoid ))
+            if($b->contains($l) && $l->getPerpendicularDistance( $p[$i], $p[$j], $this->ellipsoid ) < 0.01)
                 return true;
         }
         return false;
