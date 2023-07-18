@@ -149,8 +149,8 @@ class Bounds implements JsonSerializable
                     return false;
             return true;
         }
-        else return $location->getLatitude() >= $this->north
-            && $location->getLatitude() <= $this->south
+        else return $location->getLatitude() <= $this->north
+            && $location->getLatitude() >= $this->south
             && $location->getLongitude() >= $this->west
             && $location->getLongitude() <= $this->east;
     }
