@@ -287,7 +287,7 @@ abstract class GeoCalculator
     protected function intersectsLocationOfPolyline( Location $l, Polyline $p ):bool
     {
         $count = $p->count();
-        for ($i = 0,$j = 1; $j <= $count; $i++, $j++ ){
+        for ($i = 0,$j = 1; isset($p[$j]); $i++, $j++ ){
             $b = new Bounds(
                 $p[$i]->getLatitude(),
                 $p[$i]->getLongitude(),
