@@ -96,13 +96,13 @@ enum Ellipsoid
         };
     }
 
-    public static function from( ?string $name , self $default = Ellipsoid::WGS_84 ):self
+    public static function from( null|string|self $name , self $default = Ellipsoid::WGS_84 ):self
     {
         return match ($name){
-            "WGS_66" => self::WGS_66 ,
-            "WGS_72" => self::WGS_72,
-            "GRS_80" => self::GRS_80,
-            "WGS_84" => self::WGS_84,
+            "WGS_66", self::WGS_66 => self::WGS_66 ,
+            "WGS_72", self::WGS_72 => self::WGS_72,
+            "GRS_80", self::GRS_80 => self::GRS_80,
+            "WGS_84", self::WGS_84 => self::WGS_84,
             default => $default
         };
     }
