@@ -260,6 +260,7 @@ class Bounds implements JsonSerializable
 
     /**
      * Создает объект границ на основе двух точек.
+     * Точки необязательно должны быть northWest или southEast.
      * @param Location $northWest
      * @param Location $southEast
      * @return Bounds

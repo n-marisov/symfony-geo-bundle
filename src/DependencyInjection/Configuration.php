@@ -23,8 +23,8 @@ class Configuration implements ConfigurationInterface
                     ->defaultValue(Ellipsoid::WGS_84->name)
                 ->end()
 
-                # Допустимая погрешность при расчетах
-                ->floatNode("allowed")->defaultValue(1.5)->end()
+                # Допустимая погрешность при сравнениях
+                ->floatNode("allowed")->min(0.01 )->defaultValue(1.5)->end()
 
 
             ->end()

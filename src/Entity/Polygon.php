@@ -88,4 +88,21 @@ class Polygon extends Geometry
 
         return $result;
     }
+
+    /**
+     * Вычисляет площадь полигона.
+     * @param GeoCalculator $calculator
+     * @return float
+     */
+    public function getArea( GeoCalculator $calculator ): float
+    {
+        if ($this->count() <= 2) return 0.0;
+        for( $i = 0,$j = 1, $area = 0;isset($this[$j]); $i=$j, $j++ )
+            $area += (
+                deg2rad($this[$j]->getLongitude() - $this[0]->getLongitude()) * cos(deg2rad($this[$j]->getLatitude())) * deg2rad($this[$i]->getLatitude() - $this[0]->getLatitude()) -
+                deg2rad($this[$i]->getLongitude() - $this[0]->getLongitude()) * cos(deg2rad($this[$i]->getLatitude())) * deg2rad($this[$j]->getLatitude() - $this[0]->getLatitude())
+            );
+
+        return abs(0.5 * $area * $calculator->getEllipsoid()->r() ** 2 );
+    }
 }

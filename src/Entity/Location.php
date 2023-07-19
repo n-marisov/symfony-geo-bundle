@@ -115,21 +115,19 @@ class Location implements LocationInterface, Stringable, JsonSerializable
 
 
     /**
-     * @param bool $isRadian
      * @return float
      */
-    public function getLatitude( bool $isRadian = false  ): float
+    public function getLatitude(): float
     {
-        return ($isRadian)? deg2rad( $this->latitude ) : $this->latitude;
+        return $this->latitude;
     }
 
     /**
-     * @param bool $isRadian
      * @return float
      */
-    public function getLongitude( bool $isRadian = false ): float
+    public function getLongitude(  ): float
     {
-        return ($isRadian)? deg2rad( $this->longitude ) : $this->longitude;
+        return $this->longitude;
     }
 
     /**
@@ -207,11 +205,10 @@ class Location implements LocationInterface, Stringable, JsonSerializable
     /**
      * Указывает что точки находятся на расстоянии не дальше $allowed.
      * @param Location $location
-     * @param float $allowed
      * @param GeoCalculator $calculator
      * @return bool
      */
-    public function sameLocation( Location $location, float $allowed = 0.001, GeoCalculator $calculator = new SphericalCalculator() ):bool
+    public function sameLocation( Location $location, GeoCalculator $calculator = new SphericalCalculator() ):bool
     {
         return  $calculator->isAllowed( $calculator->getDistance($this,$location) );
     }

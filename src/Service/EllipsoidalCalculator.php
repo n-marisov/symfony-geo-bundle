@@ -18,7 +18,7 @@ class EllipsoidalCalculator extends GeoCalculator
     protected const M_2_PI = M_PI * 2;
     protected const M_3_PI = M_PI * 3;
 
-    protected int $iterationsCount = 100;
+    protected int $iterationsCount = 200;
 
     /**
      * @return int
@@ -164,8 +164,6 @@ class EllipsoidalCalculator extends GeoCalculator
         $startLon = deg2rad( $start->getLongitude() );
         $endLon = deg2rad($end->getLongitude());
 
-        $a = $this->ellipsoid->a();
-        $b = $this->ellipsoid->b();
         $f = $this->ellipsoid->flattening();
 
         $L = $endLon - $startLon;
@@ -204,16 +202,13 @@ class EllipsoidalCalculator extends GeoCalculator
             if ($cosSquAlpha !== 0.0) {
                 $cos2SigmaM = $cosSigma - 2 * $sinU1 * $sinU2 / $cosSquAlpha;
             }
-
-            //$C = $f / 16 * $cosSquAlpha * (4 + $f * (4 - 3 * $cosSquAlpha));
-
             $C = $this->calcC( $cosSquAlpha );
 
             $lambdaP = $lambda;
             $lambda = $L + (1 - $C) * $f * $sinAlpha
                 * ($sigma + $C * $sinSigma * ($cos2SigmaM + $C * $cosSigma * (-1 + 2 * $cos2SigmaM * $cos2SigmaM)));
             $iterations++;
-        } while (abs($lambda - $lambdaP) > 1e-12 && $iterations < 200);
+        } while ($this->iterationsOk( $iterations, $lambda , $lambdaP));
 
         if ($iterations >= 200) {
             throw new NotConvergingException('Inverse EllipsoidalCalculator Formula did not converge');
@@ -224,7 +219,7 @@ class EllipsoidalCalculator extends GeoCalculator
         $A = $this->calcA( $K );
         $B = $this->calcB( $K );
 
-        $distance = $b * $A * ( $sigma - $this->calcDeltaSigma( $B, $sinSigma, $cosSigma, $cos2SigmaM ));
+        $distance = $this->ellipsoid->b() * $A * ( $sigma - $this->calcDeltaSigma( $B, $sinSigma, $cosSigma, $cos2SigmaM ));
 
         $a1 = atan2($cosU2 * $sinLambda, $cosU1 * $sinU2 - $sinU1 * $cosU2 * $cosLambda);
         $a2 = atan2($cosU1 * $sinLambda, -$sinU1 * $cosU2 + $cosU1 * $sinU2 * $cosLambda);
@@ -314,7 +309,7 @@ class EllipsoidalCalculator extends GeoCalculator
      */
     protected function iterationsOk( int $i, float $sigma , float $sigmaS ):bool
     {
-        return $this->iterationsCount > $i && $sigma !== $sigmaS && abs($sigma - $sigmaS) > 1e-12;
+        return $this->iterationsCount > $i && abs($sigma - $sigmaS) > 1e-12;
     }
 
     /**

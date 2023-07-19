@@ -32,6 +32,7 @@ abstract class GeoCalculator
 
     /**
      * @param Ellipsoid $ellipsoid
+     * @param float $allowed
      */
     public function __construct( Ellipsoid $ellipsoid = Ellipsoid::WGS_84, float $allowed = 1.5)
     {
@@ -358,5 +359,43 @@ abstract class GeoCalculator
         );
     }
 
+    /**
+     * Возвращает эллипсоид.
+     * @return Ellipsoid
+     */
+    public function getEllipsoid(): Ellipsoid
+    {
+        return $this->ellipsoid;
+    }
+
+    /**
+     * Возвращает допустимую погрешность
+     * при сравнениях.
+     * @return float
+     */
+    public function getAllowed(): float
+    {
+        return $this->allowed;
+    }
+
+    /**
+     * Возвращает новый экземпляр калькулятора
+     * с измененными параметрами.
+     * @param Ellipsoid|null $ellipsoid
+     * @param float|null $allowed
+     * @return $this
+     */
+    public function build( ?Ellipsoid $ellipsoid = null, ?float $allowed = null ):static
+    {
+        $instance = clone $this;
+
+        if(isset($allowed))
+            $instance->allowed = abs($allowed);
+
+        if(isset($ellipsoid))
+            $instance->ellipsoid = $ellipsoid;
+
+        return $instance;
+    }
 
 }
