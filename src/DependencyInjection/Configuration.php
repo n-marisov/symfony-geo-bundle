@@ -19,8 +19,8 @@ class Configuration implements ConfigurationInterface
 
                 # Эллипсоид для калькулятора.
                 ->enumNode('ellipsoid')
-                ->values(Ellipsoid::cases())
-                ->defaultValue(Ellipsoid::WGS_84->name)
+                    ->values(array_map(fn ( Ellipsoid $ellipsoid ) => $ellipsoid->name, Ellipsoid::cases()))
+                    ->defaultValue(Ellipsoid::WGS_84->name)
                 ->end()
 
                 # Допустимая погрешность при расчетах
