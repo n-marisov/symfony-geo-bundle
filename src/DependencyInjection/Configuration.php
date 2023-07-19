@@ -26,6 +26,7 @@ class Configuration implements ConfigurationInterface
                 # Допустимая погрешность при расчетах
                 ->floatNode("allowed")->defaultValue(1.5)->end()
 
+
             ->end()
         ->end();
 

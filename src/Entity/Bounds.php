@@ -257,4 +257,20 @@ class Bounds implements JsonSerializable
     {
         return (new static())->calculate( $geometry );
     }
+
+    /**
+     * Создает объект границ на основе двух точек.
+     * @param Location $northWest
+     * @param Location $southEast
+     * @return Bounds
+     */
+    public static function createFromLocations( Location $northWest, Location $southEast ):Bounds
+    {
+        return new Bounds(
+            max( $northWest->getLatitude() , $southEast->getLatitude() ),
+            min( $northWest->getLongitude() , $southEast->getLongitude() ),
+            min( $northWest->getLatitude() , $southEast->getLatitude() ),
+            max( $northWest->getLongitude() , $southEast->getLongitude() )
+        );
+    }
 }

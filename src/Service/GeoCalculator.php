@@ -275,22 +275,9 @@ abstract class GeoCalculator
                 ];
                 if($orientations[0] !== $orientations[1] && $orientations[2] !== $orientations[3])
                     return true;
-                elseif (in_array(Orientation::COLLINEAR,$orientations)){
-                    $b1 = new Bounds(
-                        $p1[$i]->getLatitude(),
-                        $p1[$i]->getLongitude(),
-                        $p1[$j]->getLatitude(),
-                        $p1[$j]->getLongitude()
-                    );
-                    $b2 = new Bounds(
-                        $p2[$i]->getLatitude(),
-                        $p2[$i]->getLongitude(),
-                        $p2[$j]->getLatitude(),
-                        $p2[$j]->getLongitude()
-                    );
-                    if($b1->intersect($b2))
+                elseif (in_array(Orientation::COLLINEAR, $orientations ))
+                    if(Bounds::createFromLocations($p1[$i],$p1[$j])->intersect(Bounds::createFromLocations($p2[$i],$p2[$j])))
                         return true;
-                }
             }
         return false;
     }
@@ -306,17 +293,10 @@ abstract class GeoCalculator
      */
     protected function intersectsLocationOfPolyline( Location $l, Polyline $p ):bool
     {
-        $count = $p->count();
-        for ($i = 0,$j = 1; isset($p[$j]); $i++, $j++ ){
-            $b = new Bounds(
-                $p[$i]->getLatitude(),
-                $p[$i]->getLongitude(),
-                $p[$j]->getLatitude(),
-                $p[$j]->getLongitude()
-            );
-            if($b->contains($l) && $l->getPerpendicularDistance( $p[$i], $p[$j], $this ) <= $this->allowed)
+        for ($i = 0,$j = 1; isset($p[$j]); $i++, $j++ )
+            if(Bounds::createFromLocations( $p[$j], $p[$j] )->contains($l) &&
+                $this->isAllowed($this->getPerpendicularDistance($p[$i], $p[$j],$l)))
                 return true;
-        }
         return false;
     }
 
