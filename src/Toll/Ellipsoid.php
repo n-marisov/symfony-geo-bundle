@@ -28,14 +28,15 @@ enum Ellipsoid
     case WGS_84;
 
     /**
+     * Экватор
      * @return float
      */
     public function a():float
     {
         return match ($this){
-            self::WGS_66 => 6378145.0,
-            self::WGS_72 => 6378135.0,
-            self::WGS_84, self::GRS_80 => 6378137.0,
+            self::WGS_66 => 6378145.0, //// 6378145
+            self::WGS_72 => 6378135.0, // 6378135
+            self::WGS_84, self::GRS_80 => 6378137.0, // 6 378 137
         };
     }
 
@@ -47,8 +48,8 @@ enum Ellipsoid
         return match ($this){
             self::WGS_66 => 6356759.7694887,
             self::WGS_72 => 6356750.5200161,
-            self::GRS_80 => 6356752.3141403,
-            self::WGS_84 => 6356752.3142452,
+            self::GRS_80 => 6356752.3141403, // 6356752.314140
+            self::WGS_84 => 6356752.3142452, // 6356752.314245
             #default => $this->a() * (1 - 1 / $this->f())
         };
     }
@@ -59,11 +60,11 @@ enum Ellipsoid
      */
     public function reverseFlattening():float
     {
-        return match ($this){
-            self::WGS_66 => 298.25,
-            self::WGS_72 => 298.26,
-            self::GRS_80 => 298.25722210088,
-            self::WGS_84 => 298.257223563,
+        return match ( $this ){
+            self::WGS_66 => 298.25, // 298.25
+            self::WGS_72 => 298.26, // 298.26
+            self::GRS_80 => 298.257222100882711, //298.257222100882711.
+            self::WGS_84 => 298.257223563, //298.257223563
         };
     }
 
@@ -78,7 +79,7 @@ enum Ellipsoid
             self::WGS_72 => 0.0033527794541675,
             self::GRS_80 => 0.0033528106811837,
             self::WGS_84 => 0.0033528106647475,
-            //default => 1 / $this->reverseF()
+            #default => 1 / $this->reverseF()
         };
     }
 
@@ -96,13 +97,13 @@ enum Ellipsoid
         };
     }
 
-    public static function from( null|string|self $name , self $default = Ellipsoid::WGS_84 ):self
+    public static function from( null|string|self $name = null, self $default = Ellipsoid::WGS_84 ):self
     {
         return match ($name){
-            "WGS_66", self::WGS_66 => self::WGS_66 ,
-            "WGS_72", self::WGS_72 => self::WGS_72,
-            "GRS_80", self::GRS_80 => self::GRS_80,
-            "WGS_84", self::WGS_84 => self::WGS_84,
+            self::WGS_66->name, self::WGS_66 => self::WGS_66 ,
+            self::WGS_72->name, self::WGS_72 => self::WGS_72,
+            self::GRS_80->name, self::GRS_80 => self::GRS_80,
+            self::WGS_84->name, self::WGS_84 => self::WGS_84,
             default => $default
         };
     }
