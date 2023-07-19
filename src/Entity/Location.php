@@ -7,8 +7,6 @@ use JsonSerializable;
 use Maris\Symfony\Geo\Interfaces\LocationInterface;
 use Maris\Symfony\Geo\Service\GeoCalculator;
 use Maris\Symfony\Geo\Service\SphericalCalculator;
-use Maris\Symfony\Geo\Toll\Cartesian;
-use Maris\Symfony\Geo\Toll\Ellipsoid;
 use Maris\Symfony\Geo\Toll\Orientation;
 use Stringable;
 
@@ -215,7 +213,7 @@ class Location implements LocationInterface, Stringable, JsonSerializable
      */
     public function sameLocation( Location $location, float $allowed = 0.001, GeoCalculator $calculator = new SphericalCalculator() ):bool
     {
-        return $calculator->getDistance($this,$location) <= $allowed;
+        return  $calculator->isAllowed( $calculator->getDistance($this,$location) );
     }
 
 
@@ -234,57 +232,15 @@ class Location implements LocationInterface, Stringable, JsonSerializable
     }
 
     /***
-     * Возвращает дистанцию по перпендикуляру к вектору образованному переданными точками.
+     * Возвращает дистанцию по перпендикуляру к прямой образованной переданными точками.
      * @param Location $lineStart
      * @param Location $lineEnd
-     * @param Ellipsoid $ellipsoid
+     * @param GeoCalculator $calculator
      * @return float
      */
-    public function getPerpendicularDistance(  Location $lineStart, Location $lineEnd ,Ellipsoid $ellipsoid ):float
+    public function getPerpendicularDistance(  Location $lineStart, Location $lineEnd , GeoCalculator $calculator ):float
     {
-        $radius = $ellipsoid->r();
-
-        $cartesianFactory = function ( Location $location , float $radius ):Cartesian
-        {
-            $latitude = deg2rad( 90 - $location->getLatitude() );
-            $longitude = $location->getLongitude();
-            $longitude = deg2rad( ($longitude > 0) ? $longitude : $longitude + 360 );
-
-            return new Cartesian(
-                $radius * cos( $longitude ) * sin( $latitude ),
-                $radius * sin( $longitude ) * sin( $latitude ),
-                $radius * cos( $latitude )
-            );
-        };
-
-        $point = $cartesianFactory( $this, $radius );
-        $lineStart = $cartesianFactory( $lineStart, $radius );
-        $lineEnd = $cartesianFactory( $lineEnd, $radius );
-
-        $normalize = new Cartesian(
-            $lineStart->y * $lineEnd->z - $lineStart->z * $lineEnd->y,
-            $lineStart->z * $lineEnd->x - $lineStart->x * $lineEnd->z,
-            $lineStart->x * $lineEnd->y - $lineStart->y * $lineEnd->x
-        );
-
-
-        $length = sqrt($normalize->x ** 2 + $normalize->y ** 2 + $normalize->z ** 2 );
-
-        if ($length == 0.0) return 0;
-
-        $normalize->x /= $length;
-        $normalize->y /= $length;
-        $normalize->z /= $length;
-
-        $theta = $normalize->x * $point->x + $normalize->y * $point->y + $normalize->z * $point->z;
-
-        $length = sqrt($point->x ** 2 + $point->y ** 2 + $point->z ** 2 );
-
-        $theta /= $length;
-
-        $distance = abs((M_PI / 2) - acos($theta));
-
-        return $distance * $radius;
+        return $calculator->getPerpendicularDistance( $lineStart, $lineEnd, $this );
     }
 
     /**

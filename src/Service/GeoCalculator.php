@@ -10,6 +10,7 @@ use Maris\Symfony\Geo\Entity\Polyline;
 use Maris\Symfony\Geo\Interfaces\LocationInterface;
 use Maris\Symfony\Geo\Interfaces\PlaceInterface;
 use Maris\Symfony\Geo\Toll\Bearing;
+use Maris\Symfony\Geo\Toll\Cartesian;
 use Maris\Symfony\Geo\Toll\Ellipsoid;
 use Maris\Symfony\Geo\Toll\Orientation;
 use ReflectionClass;
@@ -21,6 +22,34 @@ abstract class GeoCalculator
      * @var Ellipsoid
      */
     protected Ellipsoid $ellipsoid;
+
+    /**
+     * Допустимая погрешность при сравнениях.
+     * @var float
+     */
+    protected float $allowed;
+
+
+    /**
+     * @param Ellipsoid $ellipsoid
+     */
+    public function __construct( Ellipsoid $ellipsoid = Ellipsoid::WGS_84, float $allowed = 1.5)
+    {
+        $this->ellipsoid = $ellipsoid;
+        $this->allowed = $allowed;
+    }
+
+    /**
+     * @param float $distance
+     * @return bool
+     */
+    public function isAllowed( float $distance ): bool
+    {
+        return $distance <= $this->allowed;
+    }
+
+
+
 
     /**
      * Вычисляет начальный азимут между точками
@@ -63,15 +92,6 @@ abstract class GeoCalculator
      * @return float
      */
     abstract public function getDistance ( LocationInterface|PlaceInterface $start , LocationInterface|PlaceInterface $end ):float;
-
-
-    /**
-     * @param Ellipsoid $ellipsoid
-     */
-    public function __construct( Ellipsoid $ellipsoid = Ellipsoid::WGS_84 )
-    {
-        $this->ellipsoid = $ellipsoid;
-    }
 
     /**
      * Преобразует в объект локации.
@@ -294,10 +314,69 @@ abstract class GeoCalculator
                 $p[$j]->getLatitude(),
                 $p[$j]->getLongitude()
             );
-            if($b->contains($l) && $l->getPerpendicularDistance( $p[$i], $p[$j], $this->ellipsoid ) < 1.5)
+            if($b->contains($l) && $l->getPerpendicularDistance( $p[$i], $p[$j], $this ) <= $this->allowed)
                 return true;
         }
         return false;
     }
+
+    /***
+     * Вычисляет расстояние по перпендикуляру от точки $location к
+     * прямой проходящей через точки $lineStart $lineEnd.
+     * @param Location $lineStart
+     * @param Location $lineEnd
+     * @param Location $location
+     * @return float
+     */
+    public function getPerpendicularDistance( Location $lineStart, Location $lineEnd, Location $location ):float
+    {
+        $point = $this->toCartesian($location);
+        $lineStart = $this->toCartesian( $lineStart );
+        $lineEnd = $this->toCartesian( $lineEnd );
+
+        $normalize = new Cartesian(
+            $lineStart->y * $lineEnd->z - $lineStart->z * $lineEnd->y,
+            $lineStart->z * $lineEnd->x - $lineStart->x * $lineEnd->z,
+            $lineStart->x * $lineEnd->y - $lineStart->y * $lineEnd->x
+        );
+
+
+        $length = sqrt($normalize->x ** 2 + $normalize->y ** 2 + $normalize->z ** 2 );
+
+        if ($length == 0.0) return 0;
+
+        $normalize->x /= $length;
+        $normalize->y /= $length;
+        $normalize->z /= $length;
+
+        $theta = $normalize->x * $point->x + $normalize->y * $point->y + $normalize->z * $point->z;
+
+        $length = sqrt($point->x ** 2 + $point->y ** 2 + $point->z ** 2 );
+
+        $theta /= $length;
+
+        $distance = abs((M_PI / 2) - acos($theta));
+
+        return $distance * $this->ellipsoid->r();
+    }
+
+    /**
+     * Приводит точку к декартовой системе координат.
+     * @param Location $location
+     * @return Cartesian
+     */
+    protected function toCartesian( Location $location ):Cartesian
+    {
+        $latitude = deg2rad( 90 - $location->getLatitude() );
+        $longitude = $location->getLongitude();
+        $longitude = deg2rad( ($longitude > 0) ? $longitude : $longitude + 360 );
+
+        return new Cartesian(
+            $this->ellipsoid->r() * cos( $longitude ) * sin( $latitude ),
+            $this->ellipsoid->r() * sin( $longitude ) * sin( $latitude ),
+            $this->ellipsoid->r() * cos( $latitude )
+        );
+    }
+
 
 }

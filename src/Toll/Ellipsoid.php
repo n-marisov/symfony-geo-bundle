@@ -95,4 +95,15 @@ enum Ellipsoid
             #default => $this->a() * (1 - 1 / $this->f() / 3)
         };
     }
+
+    public static function from( ?string $name , self $default = Ellipsoid::WGS_84 ):self
+    {
+        return match ($name){
+            "WGS_66" => self::WGS_66 ,
+            "WGS_72" => self::WGS_72,
+            "GRS_80" => self::GRS_80,
+            "WGS_84" => self::WGS_84,
+            default => $default
+        };
+    }
 }
