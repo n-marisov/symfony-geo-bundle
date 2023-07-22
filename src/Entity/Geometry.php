@@ -48,9 +48,13 @@ abstract class Geometry implements GeometryInterface, Countable, ArrayAccess
     /**
      *
      */
-    public function __construct()
+    public function __construct( Location ... $locations )
     {
         $this->coordinates = new ArrayCollection();
+
+        foreach ($locations as $location)
+            $this->coordinates->add( $location );
+
         $this->bounds = Bounds::createFromGeometry( $this );
     }
 
