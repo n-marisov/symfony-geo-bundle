@@ -1,8 +1,6 @@
 <?php
 
-namespace Maris\Symfony\Geo\Toll;
-
-use Maris\Symfony\Geo\Entity\Location;
+namespace Maris\Symfony\Geo\Entity;
 
 /***
  * Луч на карте.

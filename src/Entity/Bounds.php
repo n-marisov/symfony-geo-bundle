@@ -216,6 +216,31 @@ class Bounds implements JsonSerializable
     {
         return new Location( $this->south, $this->east );
     }
+
+    /**
+     * Возвращает объект границ увеличенный на $distance.
+     * Для уменьшения границ необходимо передать отрицательное число.
+     * @param float $distance
+     * @param GeoCalculator $calculator
+     * @return Bounds
+     */
+    public function increase( float $distance , GeoCalculator $calculator ):Bounds
+    {
+
+        if($distance === 0.0)
+            return clone $this;
+
+        $isPositive = $distance > 0;
+
+        $northWestBearing = $isPositive ? 315 : 135 ;
+        $southEastBearing = $isPositive ? 135 : 315 ;
+
+        return self::createFromLocations(
+            $calculator->getDestination( $this->getNorthWest(), $northWestBearing, $distance ),
+            $calculator->getDestination( $this->getSouthEast(), $southEastBearing, $distance )
+        );
+    }
+
     /**
      * Приводит объект к объекту bbox GeoJson.
      * @return array
