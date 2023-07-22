@@ -58,14 +58,14 @@ class SphericalCalculator extends GeoCalculator
 
     public function getFinalBearing(Location $start, Location $end): float
     {
-        return $this->getFullBearing( $start, $end )->getFinal();
+        return fmod($this->getInitialBearing( $end, $start ) + 180, 360);
     }
 
     public function getFullBearing(Location $start, Location $end): Bearing
     {
-        $initialBearing = $this->getInitialBearing(  $end, $start );
-        return (new Bearing())->setInitial($initialBearing)
-            ->setFinal( fmod($initialBearing + 180, 360) );
+        return (new Bearing())
+            ->setInitial( $this->getInitialBearing( $start, $end ) )
+            ->setFinal( $this->getFinalBearing( $start, $end ) );
     }
 
     /**
