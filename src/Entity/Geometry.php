@@ -9,7 +9,6 @@ use Doctrine\Common\Collections\Collection;
 use Exception;
 use Maris\Symfony\Geo\Interfaces\GeometryInterface;
 use Maris\Symfony\Geo\Service\GeoCalculator;
-use Maris\Symfony\Geo\Toll\Circle;
 use ReflectionException;
 use Traversable;
 
@@ -46,12 +45,6 @@ abstract class Geometry implements GeometryInterface, Countable, ArrayAccess
      */
     protected ?Bounds $bounds = null;
 
-    /***
-     * Круг описанный вокруг текущей фигуры.
-     * @var Circle|null
-     */
-    protected ?Circle $circle = null;
-
     /**
      *
      */
@@ -59,7 +52,6 @@ abstract class Geometry implements GeometryInterface, Countable, ArrayAccess
     {
         $this->coordinates = new ArrayCollection();
         $this->bounds = Bounds::createFromGeometry( $this );
-        $this->circle = Circle::create( $this );
     }
 
     public function getId(): ?int
@@ -75,13 +67,6 @@ abstract class Geometry implements GeometryInterface, Countable, ArrayAccess
         return $this->bounds ?? $this->bounds = Bounds::createFromGeometry( $this );
     }
 
-    /**
-     * @return Circle
-     */
-    public function getCircle(): Circle
-    {
-        return $this->circle ?? $this->circle = Circle::create( $this );
-    }
 
 
 
