@@ -63,7 +63,7 @@ class SphericalCalculator extends GeoCalculator
 
     public function getFullBearing(Location $start, Location $end): Bearing
     {
-        $initialBearing = $this->getInitialBearing( $start, $end );
+        $initialBearing = $this->getInitialBearing(  $end, $start );
         return (new Bearing())->setInitial($initialBearing)
             ->setFinal( fmod($initialBearing + 180, 360) );
     }

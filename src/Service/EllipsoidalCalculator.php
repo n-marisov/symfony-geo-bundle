@@ -198,10 +198,15 @@ class EllipsoidalCalculator extends GeoCalculator
             $sinAlpha = $cosU1 * $cosU2 * $sinLambda / $sinSigma;
             $cosSquAlpha = 1 - $sinAlpha * $sinAlpha;
 
+            /**
+             * Устанавливаем на 0 на случай экватариальных линий
+             */
             $cos2SigmaM = 0;
             if ($cosSquAlpha !== 0.0) {
                 $cos2SigmaM = $cosSigma - 2 * $sinU1 * $sinU2 / $cosSquAlpha;
             }
+
+
             $C = $this->calcC( $cosSquAlpha );
 
             $lambdaP = $lambda;
