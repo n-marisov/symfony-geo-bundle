@@ -294,8 +294,8 @@ abstract class GeoCalculator
      */
     protected function intersectsLocationOfPolyline( Location $l, Polyline $p ):bool
     {
-        for ($i = 0,$j = 1; isset($p[$j]); $i++, $j++ )
-            if(Bounds::createFromLocations( $p[$j], $p[$j] )->contains($l) &&
+        for ($i = 0,$j = 1; $p->offsetExists($j); $j = $i, $i++ )
+            if(Bounds::createFromLocations( $p[$i], $p[$j] )->contains($l) &&
                 $this->isAllowed($this->getPerpendicularDistance($p[$i], $p[$j],$l)))
                 return true;
         return false;
