@@ -229,7 +229,7 @@ class EllipsoidalCalculator extends GeoCalculator
 
         return [
             "distance" => $distance,
-            "bearing" => (new Bearing())->setInitial( $a1 )->setFinal( $a2 )
+            "bearing" => (new Bearing())->setInitial( rad2deg($a1) )->setFinal( rad2deg($a2) )
         ];
     }
 
