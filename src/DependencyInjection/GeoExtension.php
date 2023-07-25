@@ -31,5 +31,8 @@ class GeoExtension extends Extension
 
         # Устанавливаем допустимую погрешность при расчетах в метрах
         $container->setParameter("geo.allowed", $config["allowed"] ?? 1.5 );
+
+        # Устанавливаем количество знаков после запятой для кодирования полилиний
+        $container->setParameter("geo.precision", $config["precision"] ?? 6 );
     }
 }

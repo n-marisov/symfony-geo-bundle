@@ -26,6 +26,10 @@ class Configuration implements ConfigurationInterface
                 # Допустимая погрешность при сравнениях
                 ->floatNode("allowed")->min(0.01 )->defaultValue(1.5)->end()
 
+                # Количество знаков после запятой для PolylineEncoder
+                ->integerNode("precision")->min(0)->defaultValue(6)->end()
+
+
 
             ->end()
         ->end();
