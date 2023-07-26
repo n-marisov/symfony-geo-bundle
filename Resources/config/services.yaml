@@ -11,8 +11,9 @@ services:
       exclude: '../../src/{DependencyInjection,Entity,Interfaces}'
 
 
-   #Maris\Symfony\Geo\Service\GeoCalculator: '@Maris\Symfony\Geo\Service\SphericalCalculator'
-   Maris\Symfony\Geo\Service\GeoCalculator: '%geo.calculator%'
+   Maris\Symfony\Geo\Service\GeoCalculator: '@Maris\Symfony\Geo\Service\SphericalCalculator'
+   #Maris\Symfony\Geo\Service\GeoCalculator: '%geo.calculator%'
+
 
    Maris\Symfony\Geo\Service\SphericalCalculator:
       arguments:
