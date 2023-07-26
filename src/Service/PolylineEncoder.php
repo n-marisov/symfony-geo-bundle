@@ -33,6 +33,16 @@ class PolylineEncoder
     }
 
     /**
+     * @return int
+     */
+    public function getPrecision(): int
+    {
+        return $this->precision;
+    }
+
+
+
+    /**
      * Декодирует строку координат в объект полилинии.
      * Если передан второй параметр, то будет дополнена
      * переданная полилиния, а не создана новая.
