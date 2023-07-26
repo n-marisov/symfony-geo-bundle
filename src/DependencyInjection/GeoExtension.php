@@ -2,6 +2,8 @@
 
 namespace Maris\Symfony\Geo\DependencyInjection;
 
+use Maris\Symfony\Geo\Service\EllipsoidalCalculator;
+use Maris\Symfony\Geo\Service\SphericalCalculator;
 use Maris\Symfony\Geo\Toll\Ellipsoid;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -25,6 +27,12 @@ class GeoExtension extends Extension
         $loader = new YamlFileLoader( $container, new FileLocator( $path ) );
         $loader->load('services.yaml');
 
+
+        # Устанавливаем эллипсоид для сервисов
+        $container->setParameter("geo.calculator",match ( $config["calculator"] ?? null ){
+            "ellipsoidal" => EllipsoidalCalculator::class,
+            default => SphericalCalculator::class
+        });
 
         # Устанавливаем эллипсоид для сервисов
         $container->setParameter("geo.ellipsoid",Ellipsoid::from($config["ellipsoid"]));

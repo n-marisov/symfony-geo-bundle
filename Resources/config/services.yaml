@@ -5,9 +5,15 @@ services:
       autowire: true      # Автоматически внедряет зависимости в ваши сервисы.
       autoconfigure: true # Автоматически регистрирует ваши сервисы как команды, подписчики событий и т.д.
 
+
    Maris\Symfony\Geo\:
       resource: '../../src/'
       exclude: '../../src/{DependencyInjection,Entity,Interfaces}'
+
+
+   Maris\Symfony\Geo\Service\GeoCalculator:
+      abstract: true
+      bind: "%geo.calculator%"
 
    Maris\Symfony\Geo\Service\SphericalCalculator:
       arguments:
@@ -18,6 +24,7 @@ services:
       arguments:
          $ellipsoid: '%geo.ellipsoid%'
          $allowed: '%geo.allowed%'
+
 
    Maris\Symfony\Geo\Service\PolylineEncoder:
       arguments:

@@ -2,16 +2,18 @@
 
 namespace Maris\Symfony\Geo\Service;
 
+use Generator;
 use Maris\Symfony\Geo\Entity\Location;
 use Maris\Symfony\Geo\Entity\Polyline;
+use RuntimeException;
 
 /***
- * Фабрика полилиний
+ * Кодирует и декодирует полилинию в строку
+ *  с помощью алгоритма кодирования координат Google.
  */
 
 class PolylineEncoder
 {
-
     /***
      * Точность количество знаков после запятой в координатах.
      * @var int
@@ -23,76 +25,102 @@ class PolylineEncoder
      */
     public function __construct( int $precision )
     {
+        if( $precision < 0 || $precision > PHP_FLOAT_DIG )
+            throw new RuntimeException(
+                "Недопустимое значение \$precision , разрешено от 0 <= precision <= ".PHP_FLOAT_DIG." ."
+            );
         $this->precision = $precision;
     }
 
     /**
-     * Декодирует строку координат в объект полилинии
-     * @param string $encodedString
+     * Декодирует строку координат в объект полилинии.
+     * Если передан второй параметр, то будет дополнена
+     * переданная полилиния, а не создана новая.
+     * @param string $encoded
+     * @param Polyline $polyline
      * @return Polyline
      */
-    public function decode( string $encodedString ):Polyline
+    public function decode( string $encoded , Polyline $polyline = new Polyline() ):Polyline
     {
-        $points = array();
-        $index = $i = 0;
-        $previous = array(0,0);
-        while ($i < strlen($encodedString)) {
-            $shift = $result = 0x00;
+        for ( $i = 0, $j = 0,$pvs = [0,0]; $j < strlen($encoded); $i++ ){
+
+            $s = $r = 0x00;
             do {
-                $bit = ord(substr($encodedString, $i++)) - 63;
-                $result |= ($bit & 0x1f) << $shift;
-                $shift += 5;
-            } while ($bit >= 0x20);
+                $bit = ord(substr($encoded, $j++)) - 63;
+                $r |= ( $bit & 0x1f ) << $s;
+                $s += 5;
+            } while ( $bit >= 0x20 );
 
-            $diff = ($result & 1) ? ~($result >> 1) : ($result >> 1);
-            $number = $previous[$index % 2] + $diff;
-            $previous[$index % 2] = $number;
-            $index++;
-            $points[] = $number * ( 1 / pow(10, $this->precision ) );
+            $pvs[$i % 2] = $pvs[$i % 2] + ( ($r & 1) ? ~($r >> 1) : ($r >> 1) );
+
+            if( $i % 2 === 1)
+                $polyline->addLocation(new Location(
+                    $pvs[0] * ( 1 / pow(10, $this->precision ) ),
+                    $pvs[1] * ( 1 / pow(10, $this->precision ) ),
+                ));
         }
-
-        $polyline = new Polyline();
-        foreach ( array_chunk($points, 2) as $point )
-            if( count($point) == 2 )
-                $polyline->addLocation(new Location($point[0],$point[1]));
-
         return $polyline;
     }
 
     /**
-     * Кодирует полилинию в строку
+     * Кодирует полилинию в строку.
+     * Если передан второй параметр, то он будет дополнен
+     * созданной полилинией вместо создания новой строки.
      * @param Polyline $polyline
+     * @param string $encoded
      * @return string
      */
-    public function encode( Polyline $polyline ):string
+    public function encode( Polyline $polyline , string $encoded = ""):string
     {
-        $result = '';
-        $index = 0;
-        $previous = array(0,0);
-        $points = [];
-
-        /***@var Location $location **/
-        foreach ( $polyline as $location ){
-            $points[] = round( $location->getLatitude() ,$this->precision );
-            $points[] = round( $location->getLongitude(),$this->precision );
-        }
-
-        foreach ( $points as $number ) {
-            $number = (float)($number);
-            $number = (int)round($number * pow(10, $this->precision ));
-            $diff = $number - $previous[$index % 2];
-            $previous[$index % 2] = $number;
-            $number = $diff;
-            $index++;
-            $number = ($number < 0) ? ~($number << 1) : ($number << 1);
-            $chunk = '';
-            while ( $number >= 0x20 ) {
-                $chunk .= chr((0x20 | ($number & 0x1f)) + 63);
-                $number >>= 5;
-            }
-            $chunk .= chr($number + 63);
-            $result .= $chunk;
-        }
-        return $result;
+        $previous = [0,0];
+        foreach ( $this->locationGenerator( $polyline ) as $position => $number )
+            $encoded .= $this->encodeNumber( $position, $number, $previous );
+        return $encoded;
     }
+
+    /***
+     * Кодирует одно значение координаты.
+     * @param int $i
+     * @param float $number
+     * @param array $previous
+     * @return string
+     */
+    protected function encodeNumber(int $i, float $number , array &$previous ):string
+    {
+        $number = (int) round($number * pow(10, $this->precision ) );
+        $diff = $number - $previous[$i % 2];
+        $previous[$i % 2] = $number;
+        return $this->encodeChunk( ($diff < 0) ? ~($diff << 1) : ($diff << 1) );
+    }
+
+    /**
+     * Кодирует число в строку.
+     * @param float $number
+     * @param string $chunk
+     * @return string
+     */
+    protected function encodeChunk( float $number, string $chunk = "" ):string
+    {
+        while ( $number >= 0x20 ) {
+            $chunk .= chr((0x20 | ($number & 0x1f)) + 63);
+            $number >>= 5;
+        }
+        return $chunk . chr($number + 63);
+    }
+
+    /**
+     * Генератор для последовательной переборки значений координат.
+     * Позволяет не копировать в память массив с всеми значениями
+     * координат полилинии
+     * @param Polyline $polyline
+     * @return Generator
+     */
+    protected function locationGenerator( Polyline $polyline ): Generator
+    {
+        foreach ($polyline as $item){
+            yield $item->getLatitude();
+            yield $item->getLongitude();
+        }
+    }
+
 }
