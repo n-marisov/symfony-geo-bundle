@@ -33,7 +33,7 @@ class Configuration implements ConfigurationInterface
                 ->floatNode("allowed")->min(0.1 )->defaultValue(1.5)->end()
 
                 # Количество знаков после запятой для PolylineEncoder
-                ->integerNode("precision")->min(0)->defaultValue(6)->end()
+                ->integerNode("precision")->min(0)->max(PHP_FLOAT_DIG )->defaultValue(6)->end()
 
 
             ->end()

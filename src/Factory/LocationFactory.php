@@ -10,6 +10,7 @@ use Maris\Symfony\Geo\Entity\Location;
  */
 class LocationFactory
 {
+
     /**
      * Создает объект Location из строки (или массива json)
      * или строки координат в любом формате.
