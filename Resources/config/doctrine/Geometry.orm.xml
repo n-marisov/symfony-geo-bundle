@@ -41,11 +41,11 @@
         <many-to-many field="coordinates" target-entity="Maris\Symfony\Geo\Entity\Location" inversed-by="geometry">
             <join-table name="geometry_locations">
                 <join-columns>
-                    <join-column name="geometry"/>
-                    <join-column name="position"/>
+                    <join-column name="location" />
+                    <join-column name="position" referenced-column-name="position"/>
                 </join-columns>
                 <inverse-join-columns>
-                    <join-column name="location"/>
+                    <join-column name="geometry" />
                 </inverse-join-columns>
             </join-table>
         </many-to-many>
