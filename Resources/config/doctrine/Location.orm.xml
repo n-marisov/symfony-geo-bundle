@@ -19,21 +19,21 @@
         <field name="longitude" type="decimal" precision="9" scale="6" />
 
         <!-- Фигура которой принадлежит точка -->
-        <many-to-one field="geometry" target-entity="Maris\Symfony\Geo\Entity\Geometry" inversed-by="coordinates">
+       <!-- <many-to-one field="geometry" target-entity="Maris\Symfony\Geo\Entity\Geometry" inversed-by="coordinates">
             <join-columns>
                 <join-column name="geometry_id"/>
             </join-columns>
             <cascade>
                 <cascade-persist/>
             </cascade>
-        </many-to-one>
+        </many-to-one> -->
 
         <!-- Позиция в фигуре, если точка принадлежит фигуре -->
-        <field name="position" type="integer" nullable="true">
+        <!--<field name="position" type="integer" nullable="true">
             <options>
                 <option name="unsigned">true</option>
             </options>
-        </field>
+        </field>-->
 
     </entity>
 

@@ -30,12 +30,12 @@
         <embedded name="bounds" class="Maris\Symfony\Geo\Entity\Bounds" column-prefix="bbox_" />
 
         <!-- Список точек фигуры -->
-        <one-to-many field="coordinates" target-entity="Maris\Symfony\Geo\Entity\Location" mapped-by="geometry">
+        <!--<one-to-many field="coordinates" target-entity="Maris\Symfony\Geo\Entity\Location" mapped-by="geometry">
             <cascade>
                 <cascade-persist/>
                 <cascade-remove/>
             </cascade>
-        </one-to-many>
+        </one-to-many>-->
 
 
         <many-to-many field="coordinates" target-entity="Maris\Symfony\Geo\Entity\Location" inversed-by="geometry">
