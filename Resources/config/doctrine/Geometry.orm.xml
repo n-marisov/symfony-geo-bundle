@@ -42,6 +42,7 @@
             <join-table name="geometry_locations">
                 <join-columns>
                     <join-column name="geometry"/>
+                    <join-column name="position"/>
                 </join-columns>
                 <inverse-join-columns>
                     <join-column name="location"/>
