@@ -47,6 +47,9 @@
                     <join-column name="location" />
                 </inverse-join-columns>
             </join-table>
+            <cascade>
+                <cascade-persist/>
+            </cascade>
         </many-to-many>
 
 
