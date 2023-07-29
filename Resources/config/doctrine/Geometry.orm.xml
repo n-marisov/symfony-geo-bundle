@@ -44,7 +44,6 @@
                     <join-column name="geometry" />
                 </join-columns>
                 <inverse-join-columns>
-                    <join-column name="position" referenced-column-name="position"/>
                     <join-column name="location" />
                 </inverse-join-columns>
             </join-table>
