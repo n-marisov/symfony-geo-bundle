@@ -48,7 +48,7 @@
                 </inverse-join-columns>
             </join-table>
             <cascade>
-                <cascade-persist/>
+                <cascade-all/>
             </cascade>
         </many-to-many>
 
