@@ -15,25 +15,9 @@
 
         <!-- -90 <= latitude <= 90 -->
         <field name="latitude" type="decimal" precision="8" scale="6" />
+
         <!-- -180 <= longitude <= 180 -->
         <field name="longitude" type="decimal" precision="9" scale="6" />
-
-        <!-- Фигура которой принадлежит точка -->
-       <!-- <many-to-one field="geometry" target-entity="Maris\Symfony\Geo\Entity\Geometry" inversed-by="coordinates">
-            <join-columns>
-                <join-column name="geometry_id"/>
-            </join-columns>
-            <cascade>
-                <cascade-persist/>
-            </cascade>
-        </many-to-one> -->
-
-        <!-- Позиция в фигуре, если точка принадлежит фигуре -->
-        <!--<field name="position" type="integer" nullable="true">
-            <options>
-                <option name="unsigned">true</option>
-            </options>
-        </field>-->
 
     </entity>
 

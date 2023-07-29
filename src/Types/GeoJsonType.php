@@ -83,7 +83,7 @@ class GeoJsonType extends JsonType
     private function createGeometry( array $coordinates , Geometry $instance ):Geometry
     {
         foreach ($coordinates as $coordinate)
-            $instance->addLocation( $this->createLocation( $coordinate ) );
+            $instance->add( $this->createLocation( $coordinate ) );
         return $instance;
     }
 

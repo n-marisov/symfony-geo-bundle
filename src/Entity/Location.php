@@ -6,7 +6,6 @@ use Exception;
 use JsonSerializable;
 use Maris\Symfony\Geo\Interfaces\LocationInterface;
 use Maris\Symfony\Geo\Service\GeoCalculator;
-use Maris\Symfony\Geo\Service\SphericalCalculator;
 use Maris\Symfony\Geo\Toll\Orientation;
 use Stringable;
 
@@ -47,18 +46,6 @@ class Location implements LocationInterface, Stringable, JsonSerializable
     private float $longitude;
 
     /**
-     * Геометрия которой принадлежит точка
-     * @var Geometry|null
-     */
-    protected ?Geometry $geometry = null;
-
-    /**
-     * Позиция точки в геометрии.
-     * @var int|null
-     */
-    protected ?int $position = null;
-
-    /**
      * Объект без широты и долготы не имеет смысла,
      * поэтому они указываются в конструкторе.
      * @param float $latitude Широта
@@ -76,43 +63,6 @@ class Location implements LocationInterface, Stringable, JsonSerializable
     {
         return $this->id;
     }
-
-    /**
-     * @return Geometry|null
-     */
-    public function getGeometry(): ?Geometry
-    {
-        return $this->geometry;
-    }
-
-    /**
-     * @param Geometry|null $geometry
-     * @return $this
-     */
-    public function setGeometry( ?Geometry $geometry ): self
-    {
-        $this->geometry = $geometry;
-        return $this;
-    }
-
-    /**
-     * @return int|null
-     */
-    public function getPosition(): ?int
-    {
-        return $this->position;
-    }
-
-    /**
-     * @param int|null $position
-     * @return $this
-     */
-    public function setPosition(?int $position): self
-    {
-        $this->position = $position;
-        return $this;
-    }
-
 
     /**
      * @return float
@@ -192,25 +142,21 @@ class Location implements LocationInterface, Stringable, JsonSerializable
     {
         return join(",",[ $this->latitude, $this->longitude ]);
     }
-    /**
-     * Возвращает true если текущая и переданная координата указывает на одну точку на карте.
-     * @param Location $location
-     * @return bool
-     */
-    public function equals( Location $location ):bool
-    {
-        return $this->latitude === $location->latitude && $this->longitude === $location->longitude;
-    }
 
     /**
-     * Указывает что точки находятся на расстоянии не дальше $allowed.
+     * Возвращает true если текущая и переданная координата указывает на одну точку на карте.
+     * Если передан калькулятор, то вычисляется приближенное расстояние на основании допустимой
+     * погрешности калькулятора.
      * @param Location $location
-     * @param GeoCalculator $calculator
+     * @param GeoCalculator|null $calculator
      * @return bool
      */
-    public function sameLocation( Location $location, GeoCalculator $calculator = new SphericalCalculator() ):bool
+    public function equals( Location $location , ?GeoCalculator $calculator = null ):bool
     {
-        return  $calculator->isAllowed( $calculator->getDistance($this,$location) );
+        if(isset($calculator))
+            return  $calculator->isAllowed( $calculator->getDistance($this,$location) );
+
+        return $this->latitude === $location->latitude && $this->longitude === $location->longitude;
     }
 
 

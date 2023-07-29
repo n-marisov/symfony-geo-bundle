@@ -64,7 +64,7 @@ class PolylineEncoder
             $pvs[$i % 2] = $pvs[$i % 2] + ( ($r & 1) ? ~($r >> 1) : ($r >> 1) );
 
             if( $i % 2 === 1)
-                $polyline->addLocation(new Location(
+                $polyline->add(new Location(
                     $pvs[0] * ( 1 / pow(10, $this->precision ) ),
                     $pvs[1] * ( 1 / pow(10, $this->precision ) ),
                 ));

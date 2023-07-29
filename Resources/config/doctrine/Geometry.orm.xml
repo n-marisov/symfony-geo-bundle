@@ -29,17 +29,10 @@
         <!-- Границы геометрической фигуры -->
         <embedded name="bounds" class="Maris\Symfony\Geo\Entity\Bounds" column-prefix="bbox_" />
 
+
         <!-- Список точек фигуры -->
-        <!--<one-to-many field="coordinates" target-entity="Maris\Symfony\Geo\Entity\Location" mapped-by="geometry">
-            <cascade>
-                <cascade-persist/>
-                <cascade-remove/>
-            </cascade>
-        </one-to-many>-->
-
-
         <many-to-many field="coordinates" target-entity="Maris\Symfony\Geo\Entity\Location" inversed-by="geometry">
-            <join-table name="geometry_locations">
+            <join-table name="geometry_coordinates">
                 <join-columns>
                     <join-column name="geometry" />
                 </join-columns>

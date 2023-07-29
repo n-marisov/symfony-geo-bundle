@@ -74,10 +74,9 @@ abstract class Geometry implements GeometryInterface, Countable, ArrayAccess
 
 
 
-    public function addLocation( Location $location ):self
+    public function add( Location $location ):self
     {
-        $this->coordinates->add($location);
-        $location->setGeometry( $this );
+        $this->coordinates->add( $location );
         $this->bounds->modify( $location );
         return $this;
     }
@@ -104,15 +103,15 @@ abstract class Geometry implements GeometryInterface, Countable, ArrayAccess
         if($this->isOriginal) return;
 
         /*** Стабилизирует порядок координат ***/
-        $coordinates = $this->coordinates->toArray();
+       // $coordinates = $this->coordinates->toArray();
         // Сортируем по ключу position
-        usort( $coordinates ,fn(Location $a, Location $b) => $a->getPosition() <=> $b->getPosition() );
+        //usort( $coordinates ,fn(Location $a, Location $b) => $a->getPosition() <=> $b->getPosition() );
 
         /**@var Location $coordinate */
-        foreach ($coordinates as $position => $coordinate)
+        /*foreach ($coordinates as $position => $coordinate)
             $coordinate->setPosition( $position );
 
-        $this->coordinates = new ArrayCollection( $coordinates );
+        $this->coordinates = new ArrayCollection( $coordinates );*/
 
         /*** Обновляем параметры Bound ***/
         $this->bounds->calculate( $this );
@@ -150,7 +149,6 @@ abstract class Geometry implements GeometryInterface, Countable, ArrayAccess
     }
 
     /**
-     * @internal
      * @param int $offset
      * @return bool
      */
@@ -160,7 +158,6 @@ abstract class Geometry implements GeometryInterface, Countable, ArrayAccess
      }
 
     /**
-     * @internal
      * @param int $offset
      * @return Location|null
      */
@@ -170,21 +167,40 @@ abstract class Geometry implements GeometryInterface, Countable, ArrayAccess
      }
 
     /**
-     * @internal
      * @param int $offset
      * @param Location $value
      * @return void
      */
-     public function offsetSet(mixed $offset, mixed $value): void
+     public function offsetSet( mixed $offset, mixed $value ): void
      {
-         # Проверяем что ключ целое число и значение координата
-         if( !is_numeric($offset) || !ctype_digit($offset) || !is_a($value,Location::class))
+         # Не позволяем установить не координаты
+         if(!is_a($value,Location::class))
              return;
 
-         $this->coordinates->offsetSet(
-             ($this->coordinates->count() < $offset) ? $this->coordinates->count() : $offset,
-             $value
-         );
+         # Если ключ null добавляем в конец
+         if(is_null($offset)){
+             $this->add( $value );
+             return;
+         }
+
+         # Ключ должен быть целым числом
+         if(!is_numeric($offset) || (int)$offset != $offset)
+             return;
+
+         # Добавляем в конец списка
+         if( $offset >=  $this->coordinates->count() )
+         {
+             $this->add( $value );
+             return;
+         }
+         $this->coordinates[$offset] = $value;
+
+
+         /*for( $i = $offset, $prewiev = clone $this[$offset]; $i < $this->count(); $i++ ){
+            $this->coordinates[$i]
+                ->setLatitude( $value->getLatitude() )
+                ->setLongitude( $value->getLongitude() );
+         }*/
      }
 
     /**

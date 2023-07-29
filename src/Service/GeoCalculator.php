@@ -124,7 +124,7 @@ abstract class GeoCalculator
         $instance = (new ReflectionClass($geometry))->newInstance();
         /**@var  Location $item **/
         foreach ($result as $item)
-            $instance->addLocation( $item );
+            $instance->add( $item );
 
         return $instance;
     }
@@ -212,7 +212,7 @@ abstract class GeoCalculator
     {
         # Пересечение двух точек.
         if(is_a($figure1,Location::class) && is_a($figure2,Location::class))
-            return $figure1->sameLocation( $figure2 );
+            return $figure1->equals( $figure2 , $this );
 
         # Пересечение точки и полигона
         elseif (is_a($figure1,Polygon::class) && is_a($figure2,Location::class))
