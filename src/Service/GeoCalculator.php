@@ -7,8 +7,7 @@ use Maris\Symfony\Geo\Entity\Geometry;
 use Maris\Symfony\Geo\Entity\Location;
 use Maris\Symfony\Geo\Entity\Polygon;
 use Maris\Symfony\Geo\Entity\Polyline;
-use Maris\Symfony\Geo\Interfaces\LocationInterface;
-use Maris\Symfony\Geo\Interfaces\PlaceInterface;
+use Maris\Symfony\Geo\Interfaces\LocationAggregateInterface as LocationAggregate;
 use Maris\Symfony\Geo\Toll\Bearing;
 use Maris\Symfony\Geo\Toll\Cartesian;
 use Maris\Symfony\Geo\Toll\Ellipsoid;
@@ -18,6 +17,18 @@ use ReflectionException;
 
 abstract class GeoCalculator
 {
+
+    /**
+     * Создает объект калькулятора.
+     * @param Ellipsoid $ellipsoid
+     * @param float $allowed
+     */
+    public function __construct( Ellipsoid $ellipsoid = Ellipsoid::WGS_84, float $allowed = 1.5)
+    {
+        $this->ellipsoid = $ellipsoid;
+        $this->allowed = $allowed;
+    }
+
     /**
      * @var Ellipsoid
      */
@@ -29,16 +40,20 @@ abstract class GeoCalculator
      */
     protected float $allowed;
 
-
-    /**
-     * @param Ellipsoid $ellipsoid
-     * @param float $allowed
+    /***
+     * Приводит к объекту Location
+     * @param Location|LocationAggregate $location
+     * @return Location
      */
-    public function __construct( Ellipsoid $ellipsoid = Ellipsoid::WGS_84, float $allowed = 1.5)
+    protected function pointToLocation( Location|LocationAggregate $location ):Location
     {
-        $this->ellipsoid = $ellipsoid;
-        $this->allowed = $allowed;
+        if(is_a($location,Location::class))
+            return $location;
+        return $location->getLocation();
     }
+
+
+
 
     /**
      * @param float $distance
@@ -54,55 +69,46 @@ abstract class GeoCalculator
 
     /**
      * Вычисляет начальный азимут между точками
-     * @param Location $start
-     * @param Location $end
+     * @param Location|LocationAggregate $start
+     * @param Location|LocationAggregate $end
      * @return float
      */
-    abstract public function getInitialBearing( Location $start , Location $end ):float;
+    abstract public function getInitialBearing( Location|LocationAggregate $start , Location|LocationAggregate $end ):float;
 
     /**
      * Вычисляет конечный азимут между точками
-     * @param Location $start
-     * @param Location $end
+     * @param Location|LocationAggregate $start
+     * @param Location|LocationAggregate $end
      * @return float
      */
-    abstract public function getFinalBearing( Location $start , Location $end ):float;
+    abstract public function getFinalBearing( Location|LocationAggregate $start , Location|LocationAggregate $end ):float;
 
     /**
      * Вычисляет все азимуты между точками
-     * @param Location $start
-     * @param Location $end
+     * @param Location|LocationAggregate $start
+     * @param Location|LocationAggregate $end
      * @return Bearing
      */
-    abstract public function getFullBearing( Location $start , Location $end ):Bearing;
+    abstract public function getFullBearing( Location|LocationAggregate $start , Location|LocationAggregate $end ):Bearing;
 
 
     /**
      * Вычисляет точку на удалении $distance и азимуте $initialBearing от точки $location.
-     * @param Location $location
+     * @param Location|LocationAggregate $location
      * @param float $initialBearing
      * @param float $distance
      * @return Location
      */
-    abstract public function getDestination( Location $location , float $initialBearing, float $distance ):Location;
+    abstract public function getDestination( Location|LocationAggregate $location , float $initialBearing, float $distance ):Location;
 
     /**
      * Возвращает дистанцию между точками в метрах.
-     * @param LocationInterface|PlaceInterface $start
-     * @param LocationInterface|PlaceInterface $end
+     * @param Location|LocationAggregate $start
+     * @param Location|LocationAggregate $end
      * @return float
      */
-    abstract public function getDistance ( LocationInterface|PlaceInterface $start , LocationInterface|PlaceInterface $end ):float;
+    abstract public function getDistance ( Location|LocationAggregate $start , Location|LocationAggregate $end ):float;
 
-    /**
-     * Преобразует в объект локации.
-     * @param LocationInterface|PlaceInterface $point
-     * @return LocationInterface
-     */
-    protected function convertPoint( LocationInterface|PlaceInterface $point ):LocationInterface
-    {
-        return is_a($point,PlaceInterface::class) ? $point->getLocation() : $point;
-    }
 
     /***
      * Создает упрощенную фигуру.
@@ -204,12 +210,19 @@ abstract class GeoCalculator
 
     /**
      * Определяет пересечение фигур.
-     * @param Location|Geometry $figure1
-     * @param Location|Geometry $figure2
+     * @param Location|LocationAggregate|Geometry $figure1
+     * @param Location|LocationAggregate|Geometry $figure2
      * @return bool
      */
-    public function intersects( Location|Geometry $figure1, Location|Geometry $figure2 ):bool
+    public function intersects( Location|LocationAggregate|Geometry $figure1, Location|LocationAggregate|Geometry $figure2 ):bool
     {
+
+        if(!is_a($figure1,Geometry::class))
+            $figure1 = $this->pointToLocation( $figure1 );
+
+        if(!is_a($figure2,Geometry::class))
+            $figure2 = $this->pointToLocation( $figure2 );
+
         # Пересечение двух точек.
         if(is_a($figure1,Location::class) && is_a($figure2,Location::class))
             return $figure1->equals( $figure2 , $this );
@@ -368,15 +381,6 @@ abstract class GeoCalculator
         return $this->ellipsoid;
     }
 
-    /**
-     * Возвращает допустимую погрешность
-     * при сравнениях.
-     * @return float
-     */
-    public function getAllowed(): float
-    {
-        return $this->allowed;
-    }
 
     /**
      * Возвращает новый экземпляр калькулятора

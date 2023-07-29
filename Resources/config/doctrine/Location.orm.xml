@@ -13,10 +13,10 @@
             </options>
         </id>
 
-        <!-- -90 <= latitude <= 90 -->
+        <!-- -90.0 <= latitude <= 90.0 -->
         <field name="latitude" type="decimal" precision="8" scale="6" />
 
-        <!-- -180 <= longitude <= 180 -->
+        <!-- -180.0 <= longitude <= 180.0 -->
         <field name="longitude" type="decimal" precision="9" scale="6" />
 
     </entity>

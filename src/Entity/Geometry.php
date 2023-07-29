@@ -7,20 +7,36 @@ use Countable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Exception;
-use Maris\Symfony\Geo\Interfaces\GeometryInterface;
+use IteratorAggregate;
+use JsonSerializable;
+use Maris\Symfony\Geo\Interfaces\LocationAggregateInterface;
+use Maris\Symfony\Geo\Iterators\LocationsIterator;
 use Maris\Symfony\Geo\Service\GeoCalculator;
 use ReflectionException;
-use Traversable;
 
 /***
  * Сущность геометрической фигуры.
  *
- *
  * Функция json_encode() всегда возвращает свойство 'geometry'
  * GeoJson спецификации RFC 7946 представление географической точки.
+ * @template T as list<Location>
  */
-abstract class Geometry implements GeometryInterface, Countable, ArrayAccess
+abstract class Geometry implements IteratorAggregate, Countable, ArrayAccess, JsonSerializable
 {
+    /**
+     * Создает объект геометрии
+     */
+    public function __construct( Location ... $locations )
+    {
+        $this->coordinates = new ArrayCollection();
+
+        foreach ($locations as $location)
+            $this->coordinates->add( $location );
+
+        $this->bounds = Bounds::createFromGeometry( $this );
+    }
+
+
     /**
      * ID в базе данных
      * @var int|null
@@ -45,19 +61,6 @@ abstract class Geometry implements GeometryInterface, Countable, ArrayAccess
      */
     protected ?Bounds $bounds = null;
 
-    /**
-     *
-     */
-    public function __construct( Location ... $locations )
-    {
-        $this->coordinates = new ArrayCollection();
-
-        foreach ($locations as $location)
-            $this->coordinates->add( $location );
-
-        $this->bounds = Bounds::createFromGeometry( $this );
-    }
-
     public function getId(): ?int
     {
         return $this->id;
@@ -71,9 +74,6 @@ abstract class Geometry implements GeometryInterface, Countable, ArrayAccess
         return $this->bounds ?? $this->bounds = Bounds::createFromGeometry( $this );
     }
 
-
-
-
     public function add( Location $location ):self
     {
         $this->coordinates->add( $location );
@@ -83,12 +83,12 @@ abstract class Geometry implements GeometryInterface, Countable, ArrayAccess
 
     /**
      * Возвращает итератор для переборки координат в цикле.
-     * @return Traversable<int,Location>
+     * @return LocationsIterator
      * @throws Exception
      */
-    public function getIterator(): Traversable
+    public function getIterator(): LocationsIterator
     {
-        return  $this->coordinates->getIterator();
+        return  new LocationsIterator( $this->coordinates );
     }
 
     /**
@@ -173,12 +173,17 @@ abstract class Geometry implements GeometryInterface, Countable, ArrayAccess
      */
      public function offsetSet( mixed $offset, mixed $value ): void
      {
+         # Получаем координаты если передан координата-имеющий объект
+         if(is_a($value,LocationAggregateInterface::class))
+             $value = $value->getLocation();
+
          # Не позволяем установить не координаты
          if(!is_a($value,Location::class))
              return;
 
          # Если ключ null добавляем в конец
-         if(is_null($offset)){
+         if(is_null($offset))
+         {
              $this->add( $value );
              return;
          }
@@ -193,14 +198,9 @@ abstract class Geometry implements GeometryInterface, Countable, ArrayAccess
              $this->add( $value );
              return;
          }
-         $this->coordinates[$offset] = $value;
 
-
-         /*for( $i = $offset, $prewiev = clone $this[$offset]; $i < $this->count(); $i++ ){
-            $this->coordinates[$i]
-                ->setLatitude( $value->getLatitude() )
-                ->setLongitude( $value->getLongitude() );
-         }*/
+         $this->coordinates[$offset]->setLatitude( $value->getLatitude() );
+         $this->coordinates[$offset]->setLongitude( $value->getLongitude() );
      }
 
     /**
@@ -214,7 +214,7 @@ abstract class Geometry implements GeometryInterface, Countable, ArrayAccess
      }
 
     /***
-     * Приводит объект к массиву
+     * Приводит объект к массиву.
      * @return array
      */
      public function toArray():array

@@ -2,15 +2,16 @@
 
 namespace Maris\Symfony\Geo\Interfaces;
 
+
 use Maris\Symfony\Geo\Entity\Location;
 
 /**
- * Интерфейс точки интереса.
+ * Реализуют объекты способные хранить в себе
+ * точку на карте или создавать ее.
  */
-interface PlaceInterface
+interface LocationAggregateInterface
 {
     /**
-     * Возвращает географические координаты точки.
      * @return Location
      */
     public function getLocation():Location;

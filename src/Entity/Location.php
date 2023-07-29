@@ -4,7 +4,6 @@ namespace Maris\Symfony\Geo\Entity;
 
 use Exception;
 use JsonSerializable;
-use Maris\Symfony\Geo\Interfaces\LocationInterface;
 use Maris\Symfony\Geo\Service\GeoCalculator;
 use Maris\Symfony\Geo\Toll\Orientation;
 use Stringable;
@@ -23,8 +22,21 @@ use Stringable;
  * Функция json_encode() всегда возвращает свойство 'geometry'
  * GeoJson спецификации RFC 7946 представление географической точки.
  */
-class Location implements LocationInterface, Stringable, JsonSerializable
+class Location implements Stringable, JsonSerializable
 {
+
+    /**
+     * Объект без широты и долготы не имеет смысла,
+     * поэтому они указываются в конструкторе.
+     * Значения приводятся к допустимому диапазону.
+     * @param float $latitude Широта
+     * @param float $longitude Долгота
+     */
+    public function __construct( float $latitude, float $longitude )
+    {
+        $this->setLatitude( $latitude )->setLongitude( $longitude );
+    }
+
     /**
      * ID в базе данных
      * @var int|null
@@ -44,17 +56,6 @@ class Location implements LocationInterface, Stringable, JsonSerializable
      * @var float
      */
     private float $longitude;
-
-    /**
-     * Объект без широты и долготы не имеет смысла,
-     * поэтому они указываются в конструкторе.
-     * @param float $latitude Широта
-     * @param float $longitude Долгота
-     */
-    public function __construct( float $latitude, float $longitude )
-    {
-        $this->setLatitude( $latitude )->setLongitude( $longitude );
-    }
 
     /**
      * @return int|null
@@ -124,26 +125,6 @@ class Location implements LocationInterface, Stringable, JsonSerializable
     }
 
     /**
-     * @throws Exception
-     */
-    public function jsonSerialize():array
-    {
-        return [
-            "type" => "Point",
-            "coordinates"=>[ $this->longitude, $this->latitude ]
-        ];
-    }
-
-    /**
-     * Приводит объект к строке.
-     * @return string
-     */
-    public function __toString():string
-    {
-        return join(",",[ $this->latitude, $this->longitude ]);
-    }
-
-    /**
      * Возвращает true если текущая и переданная координата указывает на одну точку на карте.
      * Если передан калькулятор, то вычисляется приближенное расстояние на основании допустимой
      * погрешности калькулятора.
@@ -184,6 +165,28 @@ class Location implements LocationInterface, Stringable, JsonSerializable
     public function getPerpendicularDistance(  Location $lineStart, Location $lineEnd , GeoCalculator $calculator ):float
     {
         return $calculator->getPerpendicularDistance( $lineStart, $lineEnd, $this );
+    }
+
+
+    /**
+     * Возвращает значение ключа 'geometry' GeoJson.
+     * @throws Exception
+     */
+    public function jsonSerialize():array
+    {
+        return [
+            "type" => "Point",
+            "coordinates"=>[ $this->longitude, $this->latitude ]
+        ];
+    }
+
+    /**
+     * Приводит объект к строке.
+     * @return string
+     */
+    public function __toString():string
+    {
+        return implode(",",[ $this->latitude, $this->longitude ]);
     }
 
 }

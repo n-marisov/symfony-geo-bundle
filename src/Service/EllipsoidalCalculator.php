@@ -5,8 +5,7 @@ namespace Maris\Symfony\Geo\Service;
 
 use Location\Exception\NotConvergingException;
 use Maris\Symfony\Geo\Entity\Location;
-use Maris\Symfony\Geo\Interfaces\LocationInterface;
-use Maris\Symfony\Geo\Interfaces\PlaceInterface;
+use Maris\Symfony\Geo\Interfaces\LocationAggregateInterface as LocationAggregate;
 use Maris\Symfony\Geo\Toll\Bearing;
 
 /**
@@ -17,65 +16,47 @@ class EllipsoidalCalculator extends GeoCalculator
 
     protected const M_2_PI = M_PI * 2;
     protected const M_3_PI = M_PI * 3;
-
     protected int $iterationsCount = 200;
 
-    /**
-     * @return int
-     */
-    public function getIterationsCount(): int
-    {
-        return $this->iterationsCount;
-    }
-
-    /**
-     * @param int $iterationsCount
-     * @return $this
-     */
-    public function setIterationsCount(int $iterationsCount): self
-    {
-        $this->iterationsCount = $iterationsCount;
-        return $this;
-    }
 
     /**
      * Вычисляет расстояние между точками
      * @inheritDoc
      */
-    public function getDistance( PlaceInterface|LocationInterface $start, PlaceInterface|LocationInterface $end ): float
+    public function getDistance( Location|LocationAggregate $start, Location|LocationAggregate $end ): float
     {
         return $this->inverse( $start, $end )["distance"];
     }
 
     /**
      * Вычисляет начальный азимут между точками.
-     * @param Location $start
-     * @param Location $end
+     * @param Location|LocationAggregate $start
+     * @param Location|LocationAggregate $end
      * @return float
      */
-    public function getInitialBearing( Location $start, Location $end ): float
+    public function getInitialBearing( Location|LocationAggregate $start, Location|LocationAggregate $end ): float
     {
         return $this->getFullBearing( $start, $end )->getInitial();
     }
 
     /***
      * Вычисляет конечный азимут между точками.
-     * @param Location $start
-     * @param Location $end
+     * @param Location|LocationAggregate $start
+     * @param Location|LocationAggregate $end
      * @return float
      */
-    public function getFinalBearing( Location $start, Location $end ): float
+    public function getFinalBearing( Location|LocationAggregate $start, Location|LocationAggregate $end ): float
     {
         return $this->getFullBearing( $start, $end )->getFinal();
     }
 
     /***
      * Вычисляет азимуты между двумя точками.
-     * @param Location $start
-     * @param Location $end
+     * @param Location|LocationAggregate $start
+     * @param Location|LocationAggregate $end
      * @return Bearing
      */
-    public function getFullBearing( Location $start, Location $end ): Bearing
+    public function getFullBearing( Location|LocationAggregate $start, Location|LocationAggregate $end ): Bearing
     {
         return $this->inverse( $start, $end )["bearing"];
     }
@@ -150,14 +131,14 @@ class EllipsoidalCalculator extends GeoCalculator
 
     /**
      * Обратная задача
-     * @param PlaceInterface|LocationInterface $start
-     * @param PlaceInterface|LocationInterface $end
+     * @param Location|LocationAggregate $start
+     * @param Location|LocationAggregate $end
      * @return array
      */
-    public function inverse( PlaceInterface|LocationInterface $start, PlaceInterface|LocationInterface $end ):array
+    public function inverse( Location|LocationAggregate $start, Location|LocationAggregate $end ):array
     {
-        $start = $this->convertPoint( $start );
-        $end = $this->convertPoint( $end );
+        $start = $this->pointToLocation( $start );
+        $end = $this->pointToLocation( $end );
 
         $startLat = deg2rad( $start->getLatitude() );
         $endLat = deg2rad($end->getLatitude());
@@ -199,7 +180,7 @@ class EllipsoidalCalculator extends GeoCalculator
             $cosSquAlpha = 1 - $sinAlpha * $sinAlpha;
 
             /**
-             * Устанавливаем на 0 на случай экватариальных линий
+             * Устанавливаем на 0 на случай экваториальных линий
              */
             $cos2SigmaM = 0;
             if ($cosSquAlpha !== 0.0) {
@@ -240,13 +221,15 @@ class EllipsoidalCalculator extends GeoCalculator
 
     /**
      * Реализация прямой задачи.
-     * @param Location $start
+     * @param Location|LocationAggregate $start
      * @param float $bearing
      * @param float $distance
      * @return array
      */
-    public function direct( Location $start , float $bearing, float $distance ):array
+    public function direct( Location|LocationAggregate $start , float $bearing, float $distance ):array
     {
+        $start = $this->pointToLocation( $start );
+
         $phi1 = deg2rad( $start->getLatitude() );
         $lambda1 = deg2rad( $start->getLongitude() );
         $alpha1 = deg2rad( $bearing );
@@ -320,7 +303,7 @@ class EllipsoidalCalculator extends GeoCalculator
     /**
      * @inheritDoc
      */
-    public function getDestination(Location $location, float $initialBearing, float $distance): Location
+    public function getDestination( Location|LocationAggregate $location, float $initialBearing, float $distance ): Location
     {
         return $this->direct( $location, $initialBearing, $distance)["end"];
     }

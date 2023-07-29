@@ -8,7 +8,7 @@ use Maris\Symfony\Geo\Service\SphericalCalculator;
 
 /**
  * Ломаная линия состоящая из двух и более точек.
- *
+ * Не может быть меньше двух точек
  * Итерируемый объект, при переборке циклом foreach перебирает внутренние точки линии.
  *
  * Функция json_encode() всегда возвращает свойство 'geometry'
@@ -16,6 +16,17 @@ use Maris\Symfony\Geo\Service\SphericalCalculator;
  */
 class Polyline extends Geometry
 {
+    /**
+     * @param Location $location1
+     * @param Location $location2
+     * @param Location ...$locations
+     */
+    public function __construct( Location $location1, Location $location2, Location ...$locations )
+    {
+        parent::__construct( $location1, $location2, ...$locations );
+    }
+
+
     /**
      * Возвращает длину линии в метрах.
      * @param GeoCalculator $calculator

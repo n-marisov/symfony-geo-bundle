@@ -44,15 +44,12 @@ class PolylineEncoder
 
     /**
      * Декодирует строку координат в объект полилинии.
-     * Если передан второй параметр, то будет дополнена
-     * переданная полилиния, а не создана новая.
      * @param string $encoded
-     * @param Polyline $polyline
      * @return Polyline
      */
-    public function decode( string $encoded , Polyline $polyline = new Polyline() ):Polyline
+    public function decode( string $encoded ):Polyline
     {
-        for ( $i = 0, $j = 0,$pvs = [0,0]; $j < strlen($encoded); $i++ ){
+        for ( $i = 0, $j = 0,$pvs = [0,0],$f = []; $j < strlen($encoded); $i++ ){
 
             $s = $r = 0x00;
             do {
@@ -64,12 +61,13 @@ class PolylineEncoder
             $pvs[$i % 2] = $pvs[$i % 2] + ( ($r & 1) ? ~($r >> 1) : ($r >> 1) );
 
             if( $i % 2 === 1)
-                $polyline->add(new Location(
+                $f[] = new Location(
                     $pvs[0] * ( 1 / pow(10, $this->precision ) ),
                     $pvs[1] * ( 1 / pow(10, $this->precision ) ),
-                ));
+                );
         }
-        return $polyline;
+
+        return new Polyline( ...$f );
     }
 
     /**

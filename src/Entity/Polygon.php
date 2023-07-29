@@ -7,8 +7,24 @@ use Exception;
 use Maris\Symfony\Geo\Service\GeoCalculator;
 use Maris\Symfony\Geo\Service\SphericalCalculator;
 
+/***
+ * Замкнутая фигура на карте.
+ * Не может состоять менее чем из 3-х точек.
+ */
 class Polygon extends Geometry
 {
+    /***
+     * @param Location $location1
+     * @param Location $location2
+     * @param Location $location3
+     * @param Location ...$locations
+     */
+    public function __construct( Location $location1, Location $location2, Location $location3, Location ...$locations )
+    {
+        parent::__construct( $location1, $location2, $location3, ...$locations );
+    }
+
+
     /**
      * Вырез в полигоне
      * @var Polygon|null
