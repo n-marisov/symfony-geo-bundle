@@ -21,7 +21,6 @@ use TypeError;
  *
  * Функция json_encode() всегда возвращает свойство 'geometry'
  * GeoJson спецификации RFC 7946 представление географической точки.
- * @template T as list<Location>
  */
 abstract class Geometry implements IteratorAggregate, Countable, ArrayAccess, JsonSerializable
 {

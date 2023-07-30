@@ -82,6 +82,19 @@ final class Location implements Stringable, JsonSerializable
     }
 
     /**
+     * Сбрасывает объекты границ всех связанных фигур.
+     * @return $this
+     */
+    private function clearBoundsGeometries():self
+    {
+        /**@var Geometry $geometry **/
+        foreach ($this->geometries as $geometry)
+            $geometry->clearBounds();
+
+        return $this;
+    }
+
+    /**
      * @return float
      */
     public function getLatitude(): float
@@ -118,11 +131,7 @@ final class Location implements Stringable, JsonSerializable
 
         $this->latitude = $latitude;
 
-        /**@var Geometry $geometry **/
-        foreach ($this->geometries as $geometry)
-            $geometry->clearBounds();
-
-        return $this;
+        return $this->clearBoundsGeometries();
     }
 
     /**
@@ -147,7 +156,7 @@ final class Location implements Stringable, JsonSerializable
         foreach ($this->geometries as $geometry)
             $geometry->clearBounds();
 
-        return $this;
+        return $this->clearBoundsGeometries();
     }
 
     /**
