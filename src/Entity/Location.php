@@ -61,9 +61,9 @@ final class Location implements Stringable, JsonSerializable, SplSubject
     private float $longitude;
 
     /**
-     * @var SplObjectStorage
+     * @var SplObjectStorage|null
      */
-    private SplObjectStorage $storage;
+    private ?SplObjectStorage $storage = null;
 
     /**
      * @return int|null
