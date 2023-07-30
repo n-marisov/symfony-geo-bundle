@@ -36,10 +36,8 @@ final class Location implements Stringable, JsonSerializable, SplSubject
      */
     public function __construct( float $latitude, float $longitude )
     {
-        $this
-            ->setLatitude( $latitude )
-            ->setLongitude( $longitude )
-            ->storage = new SplObjectStorage();
+        $this->storage = new SplObjectStorage();
+        $this->setLatitude( $latitude )->setLongitude( $longitude );
     }
 
     /**
