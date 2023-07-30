@@ -90,6 +90,7 @@ abstract class Geometry implements IteratorAggregate, Countable, ArrayAccess, Js
     {
         $location->attach( $this );
         $this->coordinates->add( $location );
+        $location->getGeometries()->add($this);
         $this->bounds = null;
         return $this;
     }

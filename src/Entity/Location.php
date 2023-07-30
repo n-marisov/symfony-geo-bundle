@@ -2,6 +2,7 @@
 
 namespace Maris\Symfony\Geo\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Exception;
 use JsonSerializable;
@@ -38,6 +39,7 @@ final class Location implements Stringable, JsonSerializable, SplSubject
     public function __construct( float $latitude, float $longitude )
     {
         $this->storage = new SplObjectStorage();
+        $this->geometries = new ArrayCollection();
         $this->setLatitude( $latitude )->setLongitude( $longitude );
     }
 
@@ -78,6 +80,14 @@ final class Location implements Stringable, JsonSerializable, SplSubject
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getGeometries(): Collection
+    {
+        return $this->geometries;
     }
 
     /**
