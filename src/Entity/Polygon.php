@@ -2,10 +2,7 @@
 
 namespace Maris\Symfony\Geo\Entity;
 
-
-use Exception;
 use Maris\Symfony\Geo\Service\GeoCalculator;
-use Maris\Symfony\Geo\Service\SphericalCalculator;
 
 /***
  * Замкнутая фигура на карте.
@@ -24,20 +21,18 @@ class Polygon extends Geometry
         parent::__construct( $location1, $location2, $location3, ...$locations );
     }
 
-
     /**
      * Вырез в полигоне
      * @var Polygon|null
      */
-    protected ?Polygon $exclude;
+    protected ?Polygon $exclude = null;
 
     /**
      * Возвращает периметр полигона в метрах.
      * @param GeoCalculator $calculator
      * @return float
-     * @throws Exception
      */
-    public function getPerimeter( GeoCalculator $calculator = new SphericalCalculator() ):float
+    public function getPerimeter( GeoCalculator $calculator ):float
     {
         $distance = 0.0;
         $start = null;

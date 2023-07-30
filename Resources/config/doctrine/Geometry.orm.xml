@@ -5,12 +5,6 @@
 
     <!-- Реализует собой фигуру на карте -->
     <entity name="Maris\Symfony\Geo\Entity\Geometry" table="geometries" inheritance-type="SINGLE_TABLE" >
-
-        <lifecycle-callbacks>
-            <!-- Событие сортирует точки фигуры по порядку перед сохранением -->
-            <lifecycle-callback type="preFlush" method="stability"/>
-        </lifecycle-callbacks>
-        
         
         <discriminator-column name="view" />
         <discriminator-map>

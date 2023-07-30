@@ -6,6 +6,9 @@ use Exception;
 use JsonSerializable;
 use Maris\Symfony\Geo\Service\GeoCalculator;
 use Maris\Symfony\Geo\Toll\Orientation;
+use SplObjectStorage;
+use SplObserver;
+use SplSubject;
 use Stringable;
 
 /**
@@ -22,9 +25,8 @@ use Stringable;
  * Функция json_encode() всегда возвращает свойство 'geometry'
  * GeoJson спецификации RFC 7946 представление географической точки.
  */
-class Location implements Stringable, JsonSerializable
+final class Location implements Stringable, JsonSerializable, SplSubject
 {
-
     /**
      * Объект без широты и долготы не имеет смысла,
      * поэтому они указываются в конструкторе.
@@ -34,7 +36,10 @@ class Location implements Stringable, JsonSerializable
      */
     public function __construct( float $latitude, float $longitude )
     {
-        $this->setLatitude( $latitude )->setLongitude( $longitude );
+        $this
+            ->setLatitude( $latitude )
+            ->setLongitude( $longitude )
+            ->storage = new SplObjectStorage();
     }
 
     /**
@@ -56,6 +61,11 @@ class Location implements Stringable, JsonSerializable
      * @var float
      */
     private float $longitude;
+
+    /**
+     * @var SplObjectStorage
+     */
+    private SplObjectStorage $storage;
 
     /**
      * @return int|null
@@ -101,6 +111,7 @@ class Location implements Stringable, JsonSerializable
             $latitude = -90.0 - fmod($latitude, 90.0);
 
         $this->latitude = $latitude;
+        $this->notify();
         return $this;
     }
 
@@ -121,6 +132,7 @@ class Location implements Stringable, JsonSerializable
             $longitude = 180.0 + fmod($longitude, 180.0);
 
         $this->longitude = $longitude;
+        $this->notify();
         return $this;
     }
 
@@ -189,4 +201,32 @@ class Location implements Stringable, JsonSerializable
         return implode(",",[ $this->latitude, $this->longitude ]);
     }
 
+    /**
+     * @internal
+     * @inheritDoc
+     */
+    public function attach(SplObserver $observer): void
+    {
+        $this->storage->attach( $observer );
+    }
+
+    /**
+     * @internal
+     * @inheritDoc
+     */
+    public function detach(SplObserver $observer): void
+    {
+        $this->storage->detach( $observer );
+    }
+
+    /**
+     * @internal
+     * @inheritDoc
+     */
+    public function notify(): void
+    {
+        /**@var SplObserver $observer */
+        foreach ($this->storage as $observer)
+            $observer->update( $this );
+    }
 }

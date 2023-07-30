@@ -2,9 +2,7 @@
 
 namespace Maris\Symfony\Geo\Entity;
 
-use Exception;
 use Maris\Symfony\Geo\Service\GeoCalculator;
-use Maris\Symfony\Geo\Service\SphericalCalculator;
 
 /**
  * Ломаная линия состоящая из двух и более точек.
@@ -31,9 +29,8 @@ class Polyline extends Geometry
      * Возвращает длину линии в метрах.
      * @param GeoCalculator $calculator
      * @return float
-     * @throws Exception
      */
-    public function getDistance( GeoCalculator $calculator = new SphericalCalculator() ):float
+    public function getDistance( GeoCalculator $calculator ):float
     {
         $distance = 0.0;
         $start = null;

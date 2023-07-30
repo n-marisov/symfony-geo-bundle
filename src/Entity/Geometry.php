@@ -6,22 +6,26 @@ use ArrayAccess;
 use Countable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Exception;
 use IteratorAggregate;
 use JsonSerializable;
 use Maris\Symfony\Geo\Interfaces\LocationAggregateInterface;
 use Maris\Symfony\Geo\Iterators\LocationsIterator;
 use Maris\Symfony\Geo\Service\GeoCalculator;
 use ReflectionException;
+use SplObserver;
+use SplSubject;
+use TypeError;
 
 /***
  * Сущность геометрической фигуры.
+ *
+ * Прослушивает событие изменения координат для обновления Geometry::$bounds.
  *
  * Функция json_encode() всегда возвращает свойство 'geometry'
  * GeoJson спецификации RFC 7946 представление географической точки.
  * @template T as list<Location>
  */
-abstract class Geometry implements IteratorAggregate, Countable, ArrayAccess, JsonSerializable
+abstract class Geometry implements IteratorAggregate, Countable, ArrayAccess, JsonSerializable, SplObserver
 {
     /**
      * Создает объект геометрии
@@ -29,25 +33,15 @@ abstract class Geometry implements IteratorAggregate, Countable, ArrayAccess, Js
     public function __construct( Location ... $locations )
     {
         $this->coordinates = new ArrayCollection();
-
         foreach ($locations as $location)
             $this->coordinates->add( $location );
-
-        $this->bounds = Bounds::createFromGeometry( $this );
     }
-
 
     /**
      * ID в базе данных
      * @var int|null
      */
     protected ?int $id = null;
-
-    /**
-     * Указывает на то что объект не изменялся.
-     * @var bool
-     */
-    protected bool $isOriginal = true;
 
     /**
      * Массив точек определяющих фигуру.
@@ -61,6 +55,9 @@ abstract class Geometry implements IteratorAggregate, Countable, ArrayAccess, Js
      */
     protected ?Bounds $bounds = null;
 
+    /**
+     * @return int|null
+     */
     public function getId(): ?int
     {
         return $this->id;
@@ -74,54 +71,108 @@ abstract class Geometry implements IteratorAggregate, Countable, ArrayAccess, Js
         return $this->bounds ?? $this->bounds = Bounds::createFromGeometry( $this );
     }
 
+    /**
+     * Вызывается при прослушивании объекта координат.
+     * @internal
+     * @inheritDoc
+     */
+    public function update(SplSubject $subject): void
+    {
+        $this->bounds = null;
+    }
+
+    /**
+     * Добавляет одну координату в конец фигуры.
+     * @param Location $location
+     * @return $this
+     */
     public function add( Location $location ):self
     {
+        $location->attach( $this );
         $this->coordinates->add( $location );
-        $this->bounds->modify( $location );
+        $this->bounds = null;
         return $this;
+    }
+
+    /**
+     * Добавляет одну или несколько координат в конец фигуры.
+     * @param Location ...$locations
+     * @return $this
+     */
+    public function push( Location ...$locations ):static
+    {
+        foreach ($locations as $location)
+            $this->add($location);
+        return $this;
+    }
+
+    /***
+     * Добавляет один или несколько координат в начало геометрии.
+     * @param Location ...$locations
+     * @return $this
+     */
+    public function unshift( Location ...$locations ):static
+    {
+        foreach ([ ...$locations, ... $this->coordinates->toArray() ] as $position => $location)
+            $this->set( $position, $location );
+        return $this;
+    }
+
+    /**
+     * Возвращает координату по позиции.
+     * @param int $key
+     * @return Location|null
+     */
+    public function get(int $key):?Location
+    {
+        return $this->coordinates->get($key);
+    }
+
+    /**
+     * Устанавливает координату по ключу.
+     * @param int $key
+     * @param Location $value
+     * @return $this
+     */
+    public function set( int $key, Location $value ):static
+    {
+        $this->bounds = null;
+
+        if($this->coordinates->offsetExists($key))
+            $this->coordinates->get($key)
+                ->getLatitude( $value->getLatitude() )
+                ->getLongitude( $value->getLongitude() );
+        else $this->add($value);
+
+        return $this;
+    }
+
+    /**
+     * Удаляет элемент из коллекции по ключу или значению.
+     * Возвращает элемент удаленный из фигуры.
+     * @param int|Location $location
+     * @return Location|null
+     */
+    public function remove( int|Location $location ):?Location
+    {
+        $removed = is_int( $location )
+            ? $this->coordinates->remove( $location )
+            : $this->coordinates->removeElement( $location );
+
+        /**@var Location $removed **/
+        $removed->detach( $this );
+
+        return $removed;
     }
 
     /**
      * Возвращает итератор для переборки координат в цикле.
      * @return LocationsIterator
-     * @throws Exception
      */
     public function getIterator(): LocationsIterator
     {
         return  new LocationsIterator( $this->coordinates );
     }
-
-    /**
-     * Стабилизирует данные фигуры.
-     * 1. Стабилизирует порядок координат.
-     * 2. Стабилизирует объект границ.
-     * @return void
-     */
-    public function stability():void
-    {
-        # Если объект не изменялся, то нечего не делаем.
-        if($this->isOriginal) return;
-
-        /*** Стабилизирует порядок координат ***/
-       // $coordinates = $this->coordinates->toArray();
-        // Сортируем по ключу position
-        //usort( $coordinates ,fn(Location $a, Location $b) => $a->getPosition() <=> $b->getPosition() );
-
-        /**@var Location $coordinate */
-        /*foreach ($coordinates as $position => $coordinate)
-            $coordinate->setPosition( $position );
-
-        $this->coordinates = new ArrayCollection( $coordinates );*/
-
-        /*** Обновляем параметры Bound ***/
-        $this->bounds->calculate( $this );
-    }
-
-
-    /**
-     * @inheritDoc
-     */
-    abstract public function jsonSerialize(): array;
 
     /***
      * Упрощает текущую геометрию.
@@ -135,7 +186,7 @@ abstract class Geometry implements IteratorAggregate, Countable, ArrayAccess, Js
     {
         $instance = $calculator->simplify( $this, $distance, $bearing);
         $this->coordinates = $instance->coordinates;
-        $this->bounds->calculate($this);
+        $this->bounds = null;
         return $this;
     }
 
@@ -163,12 +214,12 @@ abstract class Geometry implements IteratorAggregate, Countable, ArrayAccess, Js
      */
      public function offsetGet(mixed $offset): ?Location
      {
-         return $this->coordinates->offsetGet( $offset );
+         return $this->get( $offset );
      }
 
     /**
      * @param int $offset
-     * @param Location $value
+     * @param Location|LocationAggregateInterface $value
      * @return void
      */
      public function offsetSet( mixed $offset, mixed $value ): void
@@ -179,28 +230,13 @@ abstract class Geometry implements IteratorAggregate, Countable, ArrayAccess, Js
 
          # Не позволяем установить не координаты
          if(!is_a($value,Location::class))
-             return;
-
-         # Если ключ null добавляем в конец
-         if(is_null($offset))
-         {
-             $this->add( $value );
-             return;
-         }
+             throw new TypeError("Недопустимое значение для объекта ".static::class);
 
          # Ключ должен быть целым числом
-         if(!is_numeric($offset) || (int)$offset != $offset)
-             return;
+         if(!is_null($offset) && (!is_numeric($offset) || (int)$offset != $offset) )
+             throw new TypeError("Недопустимый ключ для объекта ".static::class);
 
-         # Добавляем в конец списка
-         if( $offset >=  $this->coordinates->count() )
-         {
-             $this->add( $value );
-             return;
-         }
-
-         $this->coordinates[$offset]->setLatitude( $value->getLatitude() );
-         $this->coordinates[$offset]->setLongitude( $value->getLongitude() );
+         $this->set( $offset, $value );
      }
 
     /**
@@ -211,6 +247,8 @@ abstract class Geometry implements IteratorAggregate, Countable, ArrayAccess, Js
      public function offsetUnset( mixed $offset ): void
      {
          $this->coordinates->offsetUnset($offset);
+         foreach ($this->coordinates->getValues() as $position => $location )
+            $this->set( $position, $location );
      }
 
     /***
@@ -221,4 +259,9 @@ abstract class Geometry implements IteratorAggregate, Countable, ArrayAccess, Js
      {
          return $this->coordinates->toArray();
      }
+
+    /**
+     * @inheritDoc
+     */
+    abstract public function jsonSerialize(): array;
  }
