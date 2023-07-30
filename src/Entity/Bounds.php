@@ -3,7 +3,7 @@
 namespace Maris\Symfony\Geo\Entity;
 
 use JsonSerializable;
-use Maris\Symfony\Geo\Service\GeoCalculator;
+use Maris\Symfony\Geo\Calculator\GeoCalculator;
 
 /**
  * Ограничивающая рамка.

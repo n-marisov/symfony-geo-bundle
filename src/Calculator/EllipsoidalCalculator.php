@@ -1,6 +1,6 @@
 <?php
 
-namespace Maris\Symfony\Geo\Service;
+namespace Maris\Symfony\Geo\Calculator;
 
 
 use Location\Exception\NotConvergingException;

@@ -3,9 +3,9 @@
 namespace Maris\Symfony\Geo\Factory;
 
 use JsonException;
+use Maris\Symfony\Geo\Encoder\PolylineEncoder;
 use Maris\Symfony\Geo\Entity\Location;
 use Maris\Symfony\Geo\Entity\Polyline;
-use Maris\Symfony\Geo\Service\PolylineEncoder;
 
 /**
  * Фабрика для создания объекта Polyline

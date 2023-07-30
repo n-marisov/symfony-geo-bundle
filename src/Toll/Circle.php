@@ -2,9 +2,9 @@
 
 namespace Maris\Symfony\Geo\Toll;
 
+use Maris\Symfony\Geo\Calculator\GeoCalculator;
 use Maris\Symfony\Geo\Entity\Geometry;
 use Maris\Symfony\Geo\Entity\Location;
-use Maris\Symfony\Geo\Service\GeoCalculator;
 
 /***
  * Круг на карте определенный центральной точкой и радиусом в метрах.

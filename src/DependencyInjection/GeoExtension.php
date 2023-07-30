@@ -2,8 +2,6 @@
 
 namespace Maris\Symfony\Geo\DependencyInjection;
 
-use Maris\Symfony\Geo\Service\EllipsoidalCalculator;
-use Maris\Symfony\Geo\Service\SphericalCalculator;
 use Maris\Symfony\Geo\Toll\Ellipsoid;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;

@@ -8,9 +8,9 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use IteratorAggregate;
 use JsonSerializable;
+use Maris\Symfony\Geo\Calculator\GeoCalculator;
 use Maris\Symfony\Geo\Interfaces\LocationAggregateInterface;
 use Maris\Symfony\Geo\Iterators\LocationsIterator;
-use Maris\Symfony\Geo\Service\GeoCalculator;
 use ReflectionException;
 use TypeError;
 

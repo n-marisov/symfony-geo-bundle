@@ -11,21 +11,21 @@ services:
       exclude: '../../src/{DependencyInjection,Entity,Interfaces}'
 
 
-   Maris\Symfony\Geo\Service\GeoCalculator: '@Maris\Symfony\Geo\Service\SphericalCalculator'
+   Maris\Symfony\Geo\Calculator\GeoCalculator: '@Maris\Symfony\Geo\Calculator\SphericalCalculator'
    #Maris\Symfony\Geo\Service\GeoCalculator: '%geo.calculator%'
 
 
-   Maris\Symfony\Geo\Service\SphericalCalculator:
+   Maris\Symfony\Geo\Calculator\SphericalCalculator:
       arguments:
          $ellipsoid: '%geo.ellipsoid%'
          $allowed: '%geo.allowed%'
 
-   Maris\Symfony\Geo\Service\EllipsoidalCalculator:
+   Maris\Symfony\Geo\Calculator\EllipsoidalCalculator:
       arguments:
          $ellipsoid: '%geo.ellipsoid%'
          $allowed: '%geo.allowed%'
 
 
-   Maris\Symfony\Geo\Service\PolylineEncoder:
+   Maris\Symfony\Geo\Encoder\PolylineEncoder:
       arguments:
          $precision: "%geo.precision%"

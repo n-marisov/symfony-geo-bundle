@@ -6,7 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Exception;
 use JsonSerializable;
-use Maris\Symfony\Geo\Service\GeoCalculator;
+use Maris\Symfony\Geo\Calculator\GeoCalculator;
 use Maris\Symfony\Geo\Toll\Orientation;
 use Stringable;
 

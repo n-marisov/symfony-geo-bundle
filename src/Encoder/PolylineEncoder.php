@@ -1,6 +1,6 @@
 <?php
 
-namespace Maris\Symfony\Geo\Service;
+namespace Maris\Symfony\Geo\Encoder;
 
 use Generator;
 use Maris\Symfony\Geo\Entity\Location;

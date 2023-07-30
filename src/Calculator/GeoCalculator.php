@@ -1,6 +1,6 @@
 <?php
 
-namespace Maris\Symfony\Geo\Service;
+namespace Maris\Symfony\Geo\Calculator;
 
 use Maris\Symfony\Geo\Entity\Bounds;
 use Maris\Symfony\Geo\Entity\Geometry;

@@ -2,7 +2,7 @@
 
 namespace Maris\Symfony\Geo\Entity;
 
-use Maris\Symfony\Geo\Service\GeoCalculator;
+use Maris\Symfony\Geo\Calculator\GeoCalculator;
 
 /**
  * Ломаная линия состоящая из двух и более точек.
