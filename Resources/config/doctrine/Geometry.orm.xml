@@ -28,10 +28,10 @@
         <many-to-many field="coordinates" target-entity="Maris\Symfony\Geo\Entity\Location" inversed-by="geometries">
             <join-table name="geometry_coordinates">
                 <join-columns>
-                    <join-column name="location_id" />
+                    <join-column name="geometry_id" />
                 </join-columns>
                 <inverse-join-columns>
-                    <join-column name="geometry_id" />
+                    <join-column name="location_id" />
                 </inverse-join-columns>
             </join-table>
             <cascade>
