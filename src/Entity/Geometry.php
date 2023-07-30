@@ -130,7 +130,7 @@ abstract class Geometry implements IteratorAggregate, Countable, ArrayAccess, Js
 
     /**
      * Устанавливает координату по ключу.
-     * @param int $key
+     * @param int|null $key
      * @param Location $value
      * @return $this
      */
