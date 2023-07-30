@@ -137,11 +137,13 @@ abstract class Geometry implements IteratorAggregate, Countable, ArrayAccess, Js
     public function set( int|null $key, Location $value ):static
     {
         $this->bounds = null;
-        if($this->coordinates->offsetExists($key))
-            $this->coordinates->get($key)
-                ->setLatitude( $value->getLatitude() )
-                ->setLongitude( $value->getLongitude() );
-        else $this->add($value);
+
+        if(is_null($key) || !$this->coordinates->offsetExists($key))
+            $this->add($value);
+
+        else $this->coordinates->get($key)
+            ->setLatitude( $value->getLatitude() )
+            ->setLongitude( $value->getLongitude() );
 
         return $this;
     }
