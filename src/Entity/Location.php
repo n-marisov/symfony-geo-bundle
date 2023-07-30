@@ -8,9 +8,6 @@ use Exception;
 use JsonSerializable;
 use Maris\Symfony\Geo\Service\GeoCalculator;
 use Maris\Symfony\Geo\Toll\Orientation;
-use SplObjectStorage;
-use SplObserver;
-use SplSubject;
 use Stringable;
 
 /**
@@ -27,7 +24,7 @@ use Stringable;
  * Функция json_encode() всегда возвращает свойство 'geometry'
  * GeoJson спецификации RFC 7946 представление географической точки.
  */
-final class Location implements Stringable, JsonSerializable, SplSubject
+final class Location implements Stringable, JsonSerializable
 {
     /**
      * Объект без широты и долготы не имеет смысла,
@@ -38,7 +35,6 @@ final class Location implements Stringable, JsonSerializable, SplSubject
      */
     public function __construct( float $latitude, float $longitude )
     {
-        $this->storage = new SplObjectStorage();
         $this->geometries = new ArrayCollection();
         $this->setLatitude( $latitude )->setLongitude( $longitude );
     }
@@ -68,11 +64,6 @@ final class Location implements Stringable, JsonSerializable, SplSubject
      * @var Collection
      */
     private Collection $geometries;
-
-    /**
-     * @var SplObjectStorage|null
-     */
-    private ?SplObjectStorage $storage = null;
 
     /**
      * @return int|null
@@ -126,7 +117,11 @@ final class Location implements Stringable, JsonSerializable, SplSubject
             $latitude = -90.0 - fmod($latitude, 90.0);
 
         $this->latitude = $latitude;
-        $this->notify();
+
+        /**@var Geometry $geometry **/
+        foreach ($this->geometries as $geometry)
+            $geometry->clearBounds();
+
         return $this;
     }
 
@@ -147,7 +142,11 @@ final class Location implements Stringable, JsonSerializable, SplSubject
             $longitude = 180.0 + fmod($longitude, 180.0);
 
         $this->longitude = $longitude;
-        $this->notify();
+
+        /**@var Geometry $geometry **/
+        foreach ($this->geometries as $geometry)
+            $geometry->clearBounds();
+
         return $this;
     }
 
@@ -214,34 +213,5 @@ final class Location implements Stringable, JsonSerializable, SplSubject
     public function __toString():string
     {
         return implode(",",[ $this->latitude, $this->longitude ]);
-    }
-
-    /**
-     * @internal
-     * @inheritDoc
-     */
-    public function attach(SplObserver $observer): void
-    {
-        $this->storage->attach( $observer );
-    }
-
-    /**
-     * @internal
-     * @inheritDoc
-     */
-    public function detach(SplObserver $observer): void
-    {
-        $this->storage->detach( $observer );
-    }
-
-    /**
-     * @internal
-     * @inheritDoc
-     */
-    public function notify(): void
-    {
-        /**@var SplObserver $observer */
-        foreach ($this->storage as $observer)
-            $observer->update( $this );
     }
 }

@@ -12,8 +12,6 @@ use Maris\Symfony\Geo\Interfaces\LocationAggregateInterface;
 use Maris\Symfony\Geo\Iterators\LocationsIterator;
 use Maris\Symfony\Geo\Service\GeoCalculator;
 use ReflectionException;
-use SplObserver;
-use SplSubject;
 use TypeError;
 
 /***
@@ -25,7 +23,7 @@ use TypeError;
  * GeoJson спецификации RFC 7946 представление географической точки.
  * @template T as list<Location>
  */
-abstract class Geometry implements IteratorAggregate, Countable, ArrayAccess, JsonSerializable, SplObserver
+abstract class Geometry implements IteratorAggregate, Countable, ArrayAccess, JsonSerializable
 {
     /**
      * Создает объект геометрии
@@ -72,11 +70,10 @@ abstract class Geometry implements IteratorAggregate, Countable, ArrayAccess, Js
     }
 
     /**
-     * Вызывается при прослушивании объекта координат.
-     * @internal
-     * @inheritDoc
+     * Сбрасывает объект границ фигуры.
+     * @return void
      */
-    public function update(SplSubject $subject): void
+    public function clearBounds():void
     {
         $this->bounds = null;
     }
@@ -88,7 +85,6 @@ abstract class Geometry implements IteratorAggregate, Countable, ArrayAccess, Js
      */
     public function add( Location $location ):self
     {
-        $location->attach( $this );
         $this->coordinates->add( $location );
         $location->getGeometries()->add($this);
         $this->bounds = null;
@@ -162,7 +158,7 @@ abstract class Geometry implements IteratorAggregate, Countable, ArrayAccess, Js
             : $this->coordinates->removeElement( $location );
 
         /**@var Location $removed **/
-        $removed->detach( $this );
+        $removed->getGeometries()->removeElement( $this );
 
         return $removed;
     }
