@@ -3,13 +3,13 @@
 namespace Maris\Symfony\Geo\EventListener;
 
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsEntityListener;
-use Doctrine\ORM\Event\PreFlushEventArgs;
+use Doctrine\ORM\Event\PostLoadEventArgs;
 use Maris\Symfony\Geo\Entity\Location;
 use ReflectionClass;
 use ReflectionException;
 use SplObjectStorage;
 
-#[AsEntityListener(event: 'onLoad',method: '__invoke',entity: Location::class)]
+#[AsEntityListener(event: 'postLoad',method: '__invoke',entity: Location::class)]
 class LocationEventListener
 {
 
@@ -23,7 +23,7 @@ class LocationEventListener
     /**
      * @throws ReflectionException
      */
-    public function __invoke(Location $location, PreFlushEventArgs $args ):void
+    public function __invoke(Location $location, PostLoadEventArgs $args ):void
     {
         $this->reflection->getProperty("storage")->setValue($location,new SplObjectStorage());
     }
