@@ -134,7 +134,7 @@ abstract class Geometry implements IteratorAggregate, Countable, ArrayAccess, Js
      * @param Location $value
      * @return $this
      */
-    public function set( int $key, Location $value ):static
+    public function set( int|null $key, Location $value ):static
     {
         $this->bounds = null;
         if($this->coordinates->offsetExists($key))
