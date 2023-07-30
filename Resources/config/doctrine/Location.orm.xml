@@ -19,6 +19,9 @@
         <!-- -180.0 <= longitude <= 180.0 -->
         <field name="longitude" type="decimal" precision="9" scale="6" />
 
+        <!-- Связанные фигуры -->
+        <many-to-many field="geometries" target-entity="Maris\Symfony\Geo\Entity\Geometry" mapped-by="coordinates"/>
+
     </entity>
 
 </doctrine-mapping>

@@ -25,7 +25,7 @@
 
 
         <!-- Список точек фигуры -->
-        <many-to-many index-by="position" field="coordinates" target-entity="Maris\Symfony\Geo\Entity\Location" inversed-by="geometry">
+        <many-to-many field="coordinates" target-entity="Maris\Symfony\Geo\Entity\Location" inversed-by="geometries">
             <join-table name="geometry_coordinates">
                 <join-columns>
                     <join-column name="geometry" />

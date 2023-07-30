@@ -2,6 +2,7 @@
 
 namespace Maris\Symfony\Geo\Entity;
 
+use Doctrine\Common\Collections\Collection;
 use Exception;
 use JsonSerializable;
 use Maris\Symfony\Geo\Service\GeoCalculator;
@@ -59,6 +60,12 @@ final class Location implements Stringable, JsonSerializable, SplSubject
      * @var float
      */
     private float $longitude;
+
+    /***
+     * Связанные фигуры.
+     * @var Collection
+     */
+    private Collection $geometries;
 
     /**
      * @var SplObjectStorage|null
