@@ -18,13 +18,13 @@ class CalculatorFactory
     protected float $allowed;
 
     /**
-     * @param string $calculator
+     * @param string $earthModel
      * @param Ellipsoid $ellipsoid
      * @param float $allowed
      */
-    public function __construct( string $calculator , Ellipsoid $ellipsoid, float $allowed )
+    public function __construct( string $earthModel , Ellipsoid $ellipsoid, float $allowed )
     {
-        $this->calculator = $calculator;
+        $this->calculator = $earthModel;
         $this->ellipsoid = $ellipsoid;
         $this->allowed = $allowed;
     }

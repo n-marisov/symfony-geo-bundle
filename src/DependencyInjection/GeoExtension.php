@@ -28,11 +28,13 @@ class GeoExtension extends Extension
         $loader->load('services.yaml');
 
 
-        # Устанавливаем эллипсоид для сервисов
-        $container->setParameter("geo.calculator",$config["calculator"] ?? "spherical" );
+        $earth = $config["earth"] ?? [];
 
         # Устанавливаем эллипсоид для сервисов
-        $container->setParameter("geo.ellipsoid",Ellipsoid::from($config["ellipsoid"]));
+        $container->setParameter("geo.earth.model",$earth["model"] ?? "spherical" );
+
+        # Устанавливаем эллипсоид для сервисов
+        $container->setParameter("geo.earth.standard",Ellipsoid::from($earth["standard"]));
 
         # Устанавливаем допустимую погрешность при расчетах в метрах
         $container->setParameter("geo.allowed", $config["allowed"] ?? 1.5 );

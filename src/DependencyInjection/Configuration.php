@@ -17,7 +17,25 @@ class Configuration implements ConfigurationInterface
         $treeBuilder->getRootNode()
             ->children()
 
-                # Калькулятор по умолчанию
+                ->arrayNode("earth")
+                    ->children()
+
+                    # Модель земного шара по умолчанию
+                    ->enumNode("model")
+                        ->values(["ellipsoidal","spherical"])
+                        ->defaultValue("spherical")
+                    ->end()
+
+                    # Стандарт эллипсоида.
+                    ->enumNode('standard')
+                        ->values(array_map(fn ( Ellipsoid $ellipsoid ) => $ellipsoid->name, Ellipsoid::cases()))
+                        ->defaultValue(Ellipsoid::WGS_84->name)
+                    ->end()
+
+                    ->end()
+                ->end()
+
+                /*# Калькулятор по умолчанию
                 ->enumNode("calculator")
                     ->values(["ellipsoidal","spherical"])
                     ->defaultValue("spherical")
@@ -27,10 +45,10 @@ class Configuration implements ConfigurationInterface
                 ->enumNode('ellipsoid')
                     ->values(array_map(fn ( Ellipsoid $ellipsoid ) => $ellipsoid->name, Ellipsoid::cases()))
                     ->defaultValue(Ellipsoid::WGS_84->name)
-                ->end()
+                ->end()*/
 
                 # Допустимая погрешность при сравнениях
-                ->floatNode("allowed")->min(0.1 )->defaultValue(1.5)->end()
+                ->floatNode("allowed")->min(0.01 )->defaultValue(1.5)->end()
 
                 # Количество знаков после запятой для PolylineEncoder
                 ->integerNode("precision")->min(0)->max(PHP_FLOAT_DIG )->defaultValue(6)->end()

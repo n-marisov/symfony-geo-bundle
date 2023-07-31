@@ -19,17 +19,15 @@ services:
    geo.calculator.spherical:
       class: Maris\Symfony\Geo\Calculator\SphericalCalculator
       arguments:
-         $ellipsoid: '%geo.ellipsoid%'
+         $ellipsoid: '%geo.earth.standard%'
          $allowed: '%geo.allowed%'
-      public: true
 
    # Калькулятор эллипсоидной земли.
    geo.calculator.ellipsoidal:
       class: Maris\Symfony\Geo\Calculator\EllipsoidalCalculator
       arguments:
-         $ellipsoid: '%geo.ellipsoid%'
+         $ellipsoid: '%geo.earth.standard%'
          $allowed: '%geo.allowed%'
-      public: true
 
 
    # Калькулятор по умолчанию.
@@ -55,8 +53,8 @@ services:
    # Фабрика для создания калькулятора по умолчанию.
    Maris\Symfony\Geo\Factory\CalculatorFactory:
       arguments:
-         $calculator: '%geo.calculator%'
-         $ellipsoid: '%geo.ellipsoid%'
+         $earthModel: '%geo.earth.model%'
+         $ellipsoid: '%geo.earth.standard%'
          $allowed: '%geo.allowed%'
 
    # Фабрика для создания координат
@@ -75,7 +73,7 @@ services:
    ############################### События ################################
    ########################################################################
 
-
+   # Событие на котором устанавливается погрешность для хранения координат.
    Maris\Symfony\Geo\EventListener\EntityUpdateListener:
       arguments:
          $precision: '%geo.precision%'
