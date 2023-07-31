@@ -7,9 +7,10 @@ use Maris\Symfony\Geo\Toll\Ellipsoid;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
+use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
-class GeoExtension extends Extension
+class GeoExtension extends Extension implements PrependExtensionInterface
 {
     /**
      * Загружаем файл конфигурации
@@ -39,5 +40,10 @@ class GeoExtension extends Extension
         # Устанавливаем количество знаков после запятой для кодирования полилиний
         $container->setParameter("geo.precision", $config["precision"] ?? 6 );
 
+    }
+
+    public function prepend(ContainerBuilder $container)
+    {
+        dump($container);
     }
 }
