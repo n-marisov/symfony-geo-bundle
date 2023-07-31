@@ -33,16 +33,9 @@ services:
 
 
    # Калькулятор по умолчанию.
-   geo.calculator:
-      class: Maris\Symfony\Geo\Calculator\GeoCalculator
+   Maris\Symfony\Geo\Calculator\GeoCalculator:
       factory: '@Maris\Symfony\Geo\Factory\CalculatorFactory'
-
-   # Фабрика для создания калькулятора по умолчанию.
-   Maris\Symfony\Geo\Factory\CalculatorFactory:
-      arguments:
-         $calculator: '%geo.calculator%'
-         $ellipsoid: '%geo.ellipsoid%'
-         $allowed: '%geo.allowed%'
+      alias: "geo.calculator"
 
    ########################################################################
    ############################### Декодеры ###############################
@@ -57,6 +50,13 @@ services:
    ########################################################################
    ############################### Фабрики ################################
    ########################################################################
+
+   # Фабрика для создания калькулятора по умолчанию.
+   Maris\Symfony\Geo\Factory\CalculatorFactory:
+      arguments:
+         $calculator: '%geo.calculator%'
+         $ellipsoid: '%geo.ellipsoid%'
+         $allowed: '%geo.allowed%'
 
    # Фабрика для создания координат
    geo.factory.location:
