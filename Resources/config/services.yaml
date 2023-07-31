@@ -35,7 +35,9 @@ services:
    # Калькулятор по умолчанию.
    Maris\Symfony\Geo\Calculator\GeoCalculator:
       factory: '@Maris\Symfony\Geo\Factory\CalculatorFactory'
-      alias: "geo.calculator"
+
+   geo.calculator:
+      alias: Maris\Symfony\Geo\Calculator\GeoCalculator
 
    ########################################################################
    ############################### Декодеры ###############################
