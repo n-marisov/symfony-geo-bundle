@@ -13,8 +13,17 @@ class EntityUpdateListener
     {
         $classMetaData = $args->getClassMetadata();
 
-        if($classMetaData->name === Location::class)
-            dump($classMetaData);
+        if($classMetaData->name !== Location::class)
+            return;
+
+        $classMetaData->mapField([
+            "fieldName" => "latitude",
+            "type" => "decimal",
+            "precision" => 7,
+            "scale" => 5,
+            "columnName" => "latitude",
+        ]);
+
     }
 
 }
