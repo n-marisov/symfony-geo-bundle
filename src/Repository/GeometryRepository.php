@@ -55,10 +55,10 @@ class GeometryRepository extends ServiceEntityRepository
     public function createBoundsBuilder( Bounds $bounds , string $alias = "geometry" ):QueryBuilder
     {
         return $this->createQueryBuilder("geometry")
-            ->andWhere("$alias.bbox_north <= :north")
-            ->andWhere("$alias.bbox_west >= :west")
-            ->andWhere("$alias.bbox_south >= :south")
-            ->andWhere("$alias.bbox_east <= :east")
+            ->andWhere("$alias.bounds.north <= :north")
+            ->andWhere("$alias.bounds.west >= :west")
+            ->andWhere("$alias.bounds.south >= :south")
+            ->andWhere("$alias.bounds.east <= :east")
             ->setParameter("north",$bounds->getNorth())
             ->setParameter("west",$bounds->getWest())
             ->setParameter("south",$bounds->getSouth())
