@@ -18,10 +18,10 @@ class Configuration implements ConfigurationInterface
             ->children()
 
                 # Калькулятор по умолчанию
-                /*->enumNode("calculator")
+                ->enumNode("calculator")
                     ->values(["ellipsoidal","spherical"])
                     ->defaultValue("spherical")
-                ->end()*/
+                ->end()
 
                 # Эллипсоид для калькулятора.
                 ->enumNode('ellipsoid')

@@ -2,34 +2,39 @@
 
 namespace Maris\Symfony\Geo\Factory;
 
-use http\Encoding\Stream;
 use Maris\Symfony\Geo\Calculator\EllipsoidalCalculator;
 use Maris\Symfony\Geo\Calculator\GeoCalculator;
+use Maris\Symfony\Geo\Calculator\SphericalCalculator;
+use Maris\Symfony\Geo\Toll\Ellipsoid;
 
 class CalculatorFactory
 {
     /**
      * @var class-string
      */
-    protected string $calculatorClass;
+    protected string $calculator;
+
+    protected Ellipsoid $ellipsoid;
+    protected float $allowed;
 
     /**
-     * @param string $calculatorClass
+     * @param string $calculator
+     * @param Ellipsoid $ellipsoid
+     * @param float $allowed
      */
-    public function __construct( string $calculatorClass )
+    public function __construct( string $calculator , Ellipsoid $ellipsoid, float $allowed )
     {
-        $this->calculatorClass = $calculatorClass;
+        $this->calculator = $calculator;
+        $this->ellipsoid = $ellipsoid;
+        $this->allowed = $allowed;
     }
 
     public function __invoke():GeoCalculator
     {
-        return new $this->calculatorClass();
+        return match ( $this->calculator ){
+            "ellipsoidal" => new EllipsoidalCalculator( $this->ellipsoid, $this->allowed ),
+            default =>new SphericalCalculator( $this->ellipsoid, $this->allowed )
+        };
     }
 
-
-    public static function createCalculator( ... $args ):GeoCalculator
-    {
-        dump($args);
-        return new EllipsoidalCalculator();
-    }
 }
