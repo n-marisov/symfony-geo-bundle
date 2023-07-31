@@ -4,7 +4,7 @@
                           https://symfony.com/schema/dic/doctrine/doctrine-1.0.xsd">
 
     <!-- Реализует собой ломаную линию на карте -->
-    <entity name="Maris\Symfony\Geo\Entity\Polyline" >
+    <entity name="Maris\Symfony\Geo\Entity\Polyline" repository-class="Maris\Symfony\Geo\Repository\PolylineRepository">
 
     </entity>
 

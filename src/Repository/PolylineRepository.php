@@ -4,23 +4,23 @@ namespace Maris\Symfony\Geo\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use Maris\Symfony\Geo\Entity\Geometry;
+use Maris\Symfony\Geo\Entity\Polyline;
 use Maris\Symfony\Geo\Traits\GeometryRepositoryBoundsSelectableTrait;
 
 /***
- * Класс репозиторий сущности Geometry.
- * @extends ServiceEntityRepository<Geometry>
+ * Класс репозиторий сущности Polyline.
+ * @extends ServiceEntityRepository<Polyline>
  *
- * @method Geometry|null find($id, $lockMode = null, $lockVersion = null)
- * @method Geometry|null findOneBy(array $criteria, array $orderBy = null)
- * @method Geometry[]    findAll()
- * @method Geometry[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Polyline|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Polyline|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Polyline[]    findAll()
+ * @method Polyline[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class GeometryRepository extends ServiceEntityRepository
+class PolylineRepository extends ServiceEntityRepository
 {
     public function __construct( ManagerRegistry $registry )
     {
-        parent::__construct( $registry, Geometry::class );
+        parent::__construct( $registry, Polyline::class );
     }
 
     /**
@@ -30,11 +30,11 @@ class GeometryRepository extends ServiceEntityRepository
 
     /**
      * Сохраняет сущность.
-     * @param Geometry $location
+     * @param Polyline $location
      * @param bool $flush
      * @return void
      */
-    public function save( Geometry $location , bool $flush = false ):void
+    public function save( Polyline $location , bool $flush = false ):void
     {
         $this->getEntityManager()->persist($location);
         if($flush)
@@ -43,14 +43,16 @@ class GeometryRepository extends ServiceEntityRepository
 
     /**
      * Удаляет сущность.
-     * @param Geometry $location
+     * @param Polyline $location
      * @param bool $flush
      * @return void
      */
-    public function remove( Geometry $location , bool $flush = false ):void
+    public function remove( Polyline $location , bool $flush = false ):void
     {
         $this->getEntityManager()->remove($location);
         if($flush)
             $this->getEntityManager()->flush();
     }
+
+
 }

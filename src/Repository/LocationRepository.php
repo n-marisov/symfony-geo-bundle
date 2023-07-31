@@ -71,6 +71,7 @@ class LocationRepository extends ServiceEntityRepository
     }
 
     /**
+     * Выбирает координаты, которые входят в $bounds.
      * @param Bounds $bounds
      * @param array|null $orderBy
      * @param int|null $limit
@@ -81,14 +82,14 @@ class LocationRepository extends ServiceEntityRepository
     {
         $builder = $this->createBoundsBuilder($bounds);
 
-        if( !empty($orderBy) )
-            $builder->orderBy( key($orderBy) , $orderBy[]);
-
         if(isset($limit))
             $builder->setMaxResults( $limit );
 
         if(isset($offset))
             $builder->setFirstResult($offset);
+
+        if( !empty($orderBy) && is_string( $key = key($orderBy)))
+            $builder->orderBy( $key , $orderBy[$key] );
 
 
         return $builder->getQuery()->getResult();
