@@ -10,7 +10,7 @@ use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
-class GeoExtension extends Extension implements PrependExtensionInterface
+class GeoExtension extends Extension
 {
     /**
      * Загружаем файл конфигурации
@@ -40,10 +40,5 @@ class GeoExtension extends Extension implements PrependExtensionInterface
         # Устанавливаем количество знаков после запятой для кодирования полилиний
         $container->setParameter("geo.precision", $config["precision"] ?? 6 );
 
-    }
-
-    public function prepend(ContainerBuilder $container)
-    {
-        dump($container);
     }
 }
