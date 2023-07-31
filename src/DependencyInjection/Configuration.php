@@ -20,7 +20,7 @@ class Configuration implements ConfigurationInterface
                 ->arrayNode("earth")
                     ->children()
 
-                    # Модель земного шара по умолчанию
+                    # Модель земного шара по умолчанию.
                     ->enumNode("model")
                         ->values(["ellipsoidal","spherical"])
                         ->defaultValue("spherical")
@@ -32,6 +32,17 @@ class Configuration implements ConfigurationInterface
                         ->defaultValue(Ellipsoid::WGS_84->name)
                     ->end()
 
+                    ->end()
+                ->end()
+
+                # Настройки точности по умолчанию.
+                ->arrayNode("accuracy")
+                    ->children()
+                        # Допустимая погрешность при сравнениях
+                        ->floatNode("allowed")->min(0.01 )->defaultValue(1.5)->end()
+
+                        # Количество знаков после запятой для PolylineEncoder
+                        ->integerNode("precision")->min(0)->max(PHP_FLOAT_DIG )->defaultValue(6)->end()
                     ->end()
                 ->end()
 
@@ -47,12 +58,12 @@ class Configuration implements ConfigurationInterface
                     ->defaultValue(Ellipsoid::WGS_84->name)
                 ->end()*/
 
-                # Допустимая погрешность при сравнениях
+               /* # Допустимая погрешность при сравнениях
                 ->floatNode("allowed")->min(0.01 )->defaultValue(1.5)->end()
 
                 # Количество знаков после запятой для PolylineEncoder
                 ->integerNode("precision")->min(0)->max(PHP_FLOAT_DIG )->defaultValue(6)->end()
-
+*/
 
             ->end()
         ->end();

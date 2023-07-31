@@ -20,14 +20,14 @@ services:
       class: Maris\Symfony\Geo\Calculator\SphericalCalculator
       arguments:
          $ellipsoid: '%geo.earth.standard%'
-         $allowed: '%geo.allowed%'
+         $allowed: '%geo.accuracy.allowed%'
 
    # Калькулятор эллипсоидной земли.
    geo.calculator.ellipsoidal:
       class: Maris\Symfony\Geo\Calculator\EllipsoidalCalculator
       arguments:
          $ellipsoid: '%geo.earth.standard%'
-         $allowed: '%geo.allowed%'
+         $allowed: '%geo.accuracy.allowed%'
 
 
    # Калькулятор по умолчанию.
@@ -44,7 +44,7 @@ services:
    geo.encoder.polyline:
       class: Maris\Symfony\Geo\Encoder\PolylineEncoder
       arguments:
-         $precision: "%geo.precision%"
+         $precision: "%geo.accuracy.precision%"
 
    ########################################################################
    ############################### Фабрики ################################
@@ -55,7 +55,7 @@ services:
       arguments:
          $earthModel: '%geo.earth.model%'
          $ellipsoid: '%geo.earth.standard%'
-         $allowed: '%geo.allowed%'
+         $allowed: '%geo.accuracy.allowed%'
 
    # Фабрика для создания координат
    geo.factory.location:
@@ -76,4 +76,4 @@ services:
    # Событие на котором устанавливается погрешность для хранения координат.
    Maris\Symfony\Geo\EventListener\EntityUpdateListener:
       arguments:
-         $precision: '%geo.precision%'
+         $precision: '%geo.accuracy.precision%'

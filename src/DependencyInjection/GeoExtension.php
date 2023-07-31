@@ -29,6 +29,7 @@ class GeoExtension extends Extension
 
 
         $earth = $config["earth"] ?? [];
+        $accuracy = $config["accuracy"] ?? [];
 
         # Устанавливаем эллипсоид для сервисов
         $container->setParameter("geo.earth.model",$earth["model"] ?? "spherical" );
@@ -36,11 +37,11 @@ class GeoExtension extends Extension
         # Устанавливаем эллипсоид для сервисов
         $container->setParameter("geo.earth.standard",Ellipsoid::from($earth["standard"]));
 
-        # Устанавливаем допустимую погрешность при расчетах в метрах
-        $container->setParameter("geo.allowed", $config["allowed"] ?? 1.5 );
+        # Устанавливаем допустимую погрешность при сравнениях в метрах
+        $container->setParameter("geo.accuracy.allowed", $accuracy["allowed"] ?? 1.5 );
 
         # Устанавливаем количество знаков после запятой для кодирования полилиний
-        $container->setParameter("geo.precision", $config["precision"] ?? 6 );
+        $container->setParameter("geo.accuracy.precision", $accuracy["precision"] ?? 6 );
 
     }
 }
