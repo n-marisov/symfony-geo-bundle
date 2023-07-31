@@ -11,8 +11,12 @@ use Maris\Symfony\Geo\Entity\Location;
 
 /***
  * Класс репозиторий сущности Geometry.
+ * @extends ServiceEntityRepository<Geometry>
  *
- *
+ * @method Geometry|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Geometry|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Geometry[]    findAll()
+ * @method Geometry[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class GeometryRepository extends ServiceEntityRepository
 {
@@ -48,13 +52,13 @@ class GeometryRepository extends ServiceEntityRepository
     }
 
 
-    public function createBoundsBuilder( Bounds $bounds , string $alias = "location" ):QueryBuilder
+    public function createBoundsBuilder( Bounds $bounds , string $alias = "geometry" ):QueryBuilder
     {
         return $this->createQueryBuilder("geometry")
-            ->andWhere("$alias.bounds.north <= :north")
-            ->andWhere("$alias.bounds.west >= :west")
-            ->andWhere("$alias.bounds.south >= :south")
-            ->andWhere("$alias.bounds.east <= :east")
+            ->andWhere("$alias.bbox_north <= :north")
+            ->andWhere("$alias.bbox_west >= :west")
+            ->andWhere("$alias.bbox_south >= :south")
+            ->andWhere("$alias.bbox_east <= :east")
             ->setParameter("north",$bounds->getNorth())
             ->setParameter("west",$bounds->getWest())
             ->setParameter("south",$bounds->getSouth())
