@@ -16,8 +16,11 @@ class EntityUpdateListener
         if($classMetaData->name !== Location::class)
             return;
 
-        dump($classMetaData->fieldMappings);
+        $classMetaData->fieldMappings["latitude"]["precision"] = 8 + 1;
+        $classMetaData->fieldMappings["latitude"]["scale"] = 6 + 1;
 
+        $classMetaData->fieldMappings["longitude"]["precision"] = 9 + 1;
+        $classMetaData->fieldMappings["longitude"]["scale"] = 6 + 1;
     }
 
 }
