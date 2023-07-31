@@ -35,6 +35,7 @@ services:
 
    geo.calculator:
       alias: Maris\Symfony\Geo\Calculator\GeoCalculator
+      public: true
 
    ########################################################################
    ############################### Декодеры ###############################

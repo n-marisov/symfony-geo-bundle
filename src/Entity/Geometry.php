@@ -12,6 +12,7 @@ use Maris\Symfony\Geo\Calculator\GeoCalculator;
 use Maris\Symfony\Geo\Interfaces\LocationAggregateInterface;
 use Maris\Symfony\Geo\Iterators\LocationsIterator;
 use ReflectionException;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use TypeError;
 
 /***
@@ -24,6 +25,18 @@ use TypeError;
  */
 abstract class Geometry implements IteratorAggregate, Countable, ArrayAccess, JsonSerializable
 {
+
+    protected static ?ContainerBuilder $calculator = null;
+
+
+    public function getCalculator():?GeoCalculator
+    {
+        $calculator = self::$calculator?->get("geo.calculator");
+        if(is_a($calculator,GeoCalculator::class))
+            return $calculator;
+        return null;
+    }
+
     /**
      * Создает объект геометрии
      */

@@ -2,6 +2,7 @@
 
 namespace Maris\Symfony\Geo\DependencyInjection;
 
+use Maris\Symfony\Geo\Entity\Geometry;
 use Maris\Symfony\Geo\Toll\Ellipsoid;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -41,6 +42,9 @@ class GeoExtension extends Extension
         # Устанавливаем количество знаков после запятой для кодирования полилиний
         $container->setParameter("geo.precision", $config["precision"] ?? 6 );
 
-        dump($container);
+
+        (new \ReflectionClass(Geometry::class))
+            ->setStaticPropertyValue("calculator",$container);
+
     }
 }
