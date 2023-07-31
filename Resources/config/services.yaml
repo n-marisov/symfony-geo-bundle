@@ -11,21 +11,49 @@ services:
       exclude: '../../src/{DependencyInjection,Entity,Interfaces}'
 
 
-   Maris\Symfony\Geo\Calculator\GeoCalculator: '@Maris\Symfony\Geo\Calculator\SphericalCalculator'
-   #Maris\Symfony\Geo\Service\GeoCalculator: '%geo.calculator%'
+   ########################################################################
+   ############################# Калькуляторы #############################
+   ########################################################################
 
-
-   Maris\Symfony\Geo\Calculator\SphericalCalculator:
+   # Калькулятор сферической земли.
+   geo.calculator.spherical:
+      class: Maris\Symfony\Geo\Calculator\SphericalCalculator
       arguments:
          $ellipsoid: '%geo.ellipsoid%'
          $allowed: '%geo.allowed%'
 
-   Maris\Symfony\Geo\Calculator\EllipsoidalCalculator:
+   # Калькулятор эллипсоидной земли.
+   geo.calculator.ellipsoidal:
+      class: Maris\Symfony\Geo\Calculator\EllipsoidalCalculator
       arguments:
          $ellipsoid: '%geo.ellipsoid%'
          $allowed: '%geo.allowed%'
 
 
-   Maris\Symfony\Geo\Encoder\PolylineEncoder:
+   # Калькулятор по умолчанию.
+   Maris\Symfony\Geo\Calculator\GeoCalculator: '@geo.calculator.spherical'
+
+   ########################################################################
+   ############################### Декодеры ###############################
+   ########################################################################
+
+   # Кодировщик полилиний
+   geo.encoder.polyline:
+      class: Maris\Symfony\Geo\Encoder\PolylineEncoder
       arguments:
          $precision: "%geo.precision%"
+
+   ########################################################################
+   ############################### Фабрики ################################
+   ########################################################################
+
+   # Фабрика для создания координат
+   geo.factory.location:
+      class: Maris\Symfony\Geo\Factory\LocationFactory
+
+   # Фабрика для создания полилиний
+   geo.factory.polyline:
+      class: Maris\Symfony\Geo\Factory\PolylineFactory
+      arguments:
+         $locationFactory: '@geo.factory.location'
+         $encoder: '@geo.encoder.polyline'
