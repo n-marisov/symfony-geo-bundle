@@ -4,7 +4,7 @@
                           https://symfony.com/schema/dic/doctrine/doctrine-1.0.xsd">
 
     <!-- Реализует собой фигуру на карте -->
-    <entity name="Maris\Symfony\Geo\Entity\Geometry" table="geometries" inheritance-type="SINGLE_TABLE" >
+    <entity name="Maris\Symfony\Geo\Entity\Geometry" table="geometries" inheritance-type="SINGLE_TABLE" repository-class="Maris\Symfony\Geo\Repository\GeometryRepository" >
         
         <discriminator-column name="view" />
 

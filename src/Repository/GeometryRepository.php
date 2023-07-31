@@ -3,6 +3,7 @@
 namespace Maris\Symfony\Geo\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Maris\Symfony\Geo\Entity\Bounds;
 use Maris\Symfony\Geo\Entity\Geometry;
@@ -46,13 +47,36 @@ class GeometryRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
     }
 
-    public function findByBounds( Bounds $bounds, array $criteria = [], ?array $orderBy = null, $limit = null, $offset = null )
+
+    public function createBoundsBuilder( Bounds $bounds , string $alias = "location" ):QueryBuilder
     {
-        /*$criteria["bounds.north"] = min( $criteria["bounds.north"] ?? 90.0, $bounds->getNorth() );
-        $criteria["bounds.west"] = max( $criteria["bounds.west"] ?? -180.0, $bounds->getWest() );
-        $criteria["bounds.south"] = max($criteria["bounds.south"] ?? -180.0, $bounds->getSouth() );
-        $criteria["bounds.east"] = min( $criteria["bounds.south"] ?? -180.0, $bounds->getEast() );
-        return parent::findBy($criteria, $orderBy, $limit, $offset);*/
+        return $this->createQueryBuilder("geometry")
+            ->andWhere("$alias.bounds.north <= :north")
+            ->andWhere("$alias.bounds.west >= :west")
+            ->andWhere("$alias.bounds.south >= :south")
+            ->andWhere("$alias.bounds.east <= :east")
+            ->setParameter("north",$bounds->getNorth())
+            ->setParameter("west",$bounds->getWest())
+            ->setParameter("south",$bounds->getSouth())
+            ->setParameter("east",$bounds->getEast());
+    }
+
+
+    public function findByBounds( Bounds $bounds, ?array $orderBy = null, $limit = null, $offset = null ):array
+    {
+        $builder = $this->createBoundsBuilder($bounds);
+
+        if( !empty($orderBy) )
+            $builder->orderBy( key($orderBy) , $orderBy[]);
+
+        if(isset($limit))
+            $builder->setMaxResults( $limit );
+
+        if(isset($offset))
+            $builder->setFirstResult($offset);
+
+
+        return $builder->getQuery()->getResult();
     }
 
 

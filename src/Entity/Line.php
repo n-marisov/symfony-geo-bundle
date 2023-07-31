@@ -57,6 +57,17 @@ class Line extends Geometry
     }
 
     /**
+     * Возвращает длину по перпендикуляру в метрах от линии до прямой.
+     * @param Location $location
+     * @param GeoCalculator $calculator
+     * @return float
+     */
+    public function getPerpendicularDistance( Location $location, GeoCalculator $calculator ):float
+    {
+        return $calculator->getPerpendicularDistance( $this->getStart(), $this->getEnd(), $location );
+    }
+
+    /**
      * Вычисляет азимуты.
      * @param GeoCalculator $calculator
      * @return Bearing
