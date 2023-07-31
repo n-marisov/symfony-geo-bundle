@@ -4,6 +4,7 @@ namespace Maris\Symfony\Geo\EventListener;
 
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
+use Maris\Symfony\Geo\Entity\Bounds;
 use Maris\Symfony\Geo\Entity\Location;
 
 #[AsDoctrineListener(event: 'loadClassMetadata')]
@@ -20,19 +21,34 @@ class EntityUpdateListener
         $this->precision = $precision;
     }
 
-
     public function __invoke( LoadClassMetadataEventArgs $args ):void
     {
-        $classMetaData = $args->getClassMetadata();
+        $meta = $args->getClassMetadata();
 
-        if($classMetaData->name !== Location::class)
-            return;
+        if($meta->name === Location::class){
 
-        $classMetaData->fieldMappings["latitude"]["precision"] = 2 + $this->precision;
-        $classMetaData->fieldMappings["latitude"]["scale"] = $this->precision;
+            $meta->fieldMappings["latitude"]["precision"] = 2 + $this->precision;
+            $meta->fieldMappings["latitude"]["scale"] = $this->precision;
 
-        $classMetaData->fieldMappings["longitude"]["precision"] = 3 + $this->precision;
-        $classMetaData->fieldMappings["longitude"]["scale"] = $this->precision;
+            $meta->fieldMappings["longitude"]["precision"] = 3 + $this->precision;
+            $meta->fieldMappings["longitude"]["scale"] = $this->precision;
+        }
+
+        elseif ($meta->name === Bounds::class){
+
+            $meta->fieldMappings["north"]["precision"] = 2 + $this->precision;
+            $meta->fieldMappings["north"]["scale"] = $this->precision;
+
+            $meta->fieldMappings["west"]["precision"] = 3 + $this->precision;
+            $meta->fieldMappings["west"]["scale"] = $this->precision;
+
+            $meta->fieldMappings["south"]["precision"] = 2 + $this->precision;
+            $meta->fieldMappings["south"]["scale"] = $this->precision;
+
+            $meta->fieldMappings["east"]["precision"] = 3 + $this->precision;
+            $meta->fieldMappings["east"]["scale"] = $this->precision;
+        }
+
     }
 
 }
