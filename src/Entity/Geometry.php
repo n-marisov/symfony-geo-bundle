@@ -31,7 +31,7 @@ abstract class Geometry implements IteratorAggregate, Countable, ArrayAccess, Js
 
     public static function getCalculator():?GeoCalculator
     {
-        $calculator = self::$calculator?->get("geo.calculator.ellipsoidal");
+        $calculator = self::$calculator->get("geo.calculator.ellipsoidal");
         dump($calculator);
         if(is_a($calculator,GeoCalculator::class))
             return $calculator;
