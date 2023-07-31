@@ -26,16 +26,21 @@ use TypeError;
 abstract class Geometry implements IteratorAggregate, Countable, ArrayAccess, JsonSerializable
 {
 
-    protected static ?ContainerBuilder $calculator = null;
+    protected static ?ContainerBuilder $container = null;
 
 
     public static function getCalculator():?GeoCalculator
     {
-        $calculator = self::$calculator->get("geo.calculator.ellipsoidal");
+        $calculator = self::$container->get("geo.calculator.ellipsoidal");
         dump($calculator);
         if(is_a($calculator,GeoCalculator::class))
             return $calculator;
         return null;
+    }
+
+    public static function setDefaultContainer(ContainerBuilder $container)
+    {
+        self::$container = $container;
     }
 
     /**

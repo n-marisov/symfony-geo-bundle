@@ -43,8 +43,9 @@ class GeoExtension extends Extension
         $container->setParameter("geo.precision", $config["precision"] ?? 6 );
 
 
-        (new \ReflectionClass(Geometry::class))
-            ->setStaticPropertyValue("calculator",$container);
+        /*(new \ReflectionClass(Geometry::class))
+            ->setStaticPropertyValue("calculator",$container);*/
+        Geometry::setDefaultContainer($container);
 
     }
 }
