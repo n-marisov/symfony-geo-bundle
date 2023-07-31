@@ -7,8 +7,10 @@
     <entity name="Maris\Symfony\Geo\Entity\Geometry" table="geometries" inheritance-type="SINGLE_TABLE" >
         
         <discriminator-column name="view" />
+
         <discriminator-map>
-            <discriminator-mapping value="LINE_STRING" class="Maris\Symfony\Geo\Entity\Polyline"/>
+            <discriminator-mapping value="LINE" class="Maris\Symfony\Geo\Entity\Line"/>
+            <discriminator-mapping value="POLYLINE" class="Maris\Symfony\Geo\Entity\Polyline"/>
             <discriminator-mapping value="POLYGON" class="Maris\Symfony\Geo\Entity\Polygon"/>
         </discriminator-map>
 

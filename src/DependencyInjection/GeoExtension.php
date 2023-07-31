@@ -42,10 +42,5 @@ class GeoExtension extends Extension
         # Устанавливаем количество знаков после запятой для кодирования полилиний
         $container->setParameter("geo.precision", $config["precision"] ?? 6 );
 
-
-        /*(new \ReflectionClass(Geometry::class))
-            ->setStaticPropertyValue("calculator",$container);*/
-        Geometry::setDefaultContainer($container);
-
     }
 }

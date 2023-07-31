@@ -3,6 +3,7 @@
 namespace Maris\Symfony\Geo\Entity;
 
 use Maris\Symfony\Geo\Calculator\GeoCalculator;
+use Maris\Symfony\Geo\Traits\GeometryListTrait;
 
 /***
  * Замкнутая фигура на карте.
@@ -20,6 +21,11 @@ class Polygon extends Geometry
     {
         parent::__construct( $location1, $location2, $location3, ...$locations );
     }
+
+    /***
+     * Трейт поддерживает доступ к элементам коллекции точек фигуры.
+     */
+    use GeometryListTrait;
 
     /**
      * Вырез в полигоне

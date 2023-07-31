@@ -34,8 +34,11 @@ services:
 
    # Калькулятор по умолчанию.
    Maris\Symfony\Geo\Calculator\GeoCalculator:
-      class: Maris\Symfony\Geo\Calculator\SphericalCalculator
-      public: true
+      factory:
+         - Maris\Symfony\Geo\Factory\CalculatorFactory
+         - 'createCalculator'
+     # class: Maris\Symfony\Geo\Calculator\SphericalCalculator
+     # public: true
 
    #geo.calculator:
       #alias: Maris\Symfony\Geo\Calculator\GeoCalculator

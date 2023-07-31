@@ -2,7 +2,12 @@
 
 namespace Maris\Symfony\Geo\Entity;
 
+use ArrayAccess;
+use Countable;
+use IteratorAggregate;
 use Maris\Symfony\Geo\Calculator\GeoCalculator;
+use Maris\Symfony\Geo\Traits\GeometryListTrait;
+use Maris\Symfony\Geo\Traits\PolylineJsonSerializableTrait;
 
 /**
  * Ломаная линия состоящая из двух и более точек.
@@ -12,7 +17,7 @@ use Maris\Symfony\Geo\Calculator\GeoCalculator;
  * Функция json_encode() всегда возвращает свойство 'geometry'
  * GeoJson спецификации RFC 7946 представление географической точки.
  */
-class Polyline extends Geometry
+class Polyline extends Geometry implements IteratorAggregate, ArrayAccess, Countable
 {
     /**
      * @param Location $location1
@@ -23,6 +28,11 @@ class Polyline extends Geometry
     {
         parent::__construct( $location1, $location2, ...$locations );
     }
+
+    /***
+     * Трейт поддерживает доступ к элементам коллекции точек фигуры.
+     */
+    use GeometryListTrait, PolylineJsonSerializableTrait;
 
 
     /**
@@ -44,17 +54,11 @@ class Polyline extends Geometry
     }
 
     /**
-     * @inheritDoc
-     * @return array{type:string, coordinates:float[][] }
+     * Создает линию из первой и последней точки полилинии.
+     * @return Line
      */
-    public function jsonSerialize(): array
+    public function toLine():Line
     {
-        return [
-            "type" => "LineString",
-            "bbox" => $this->bounds,
-            "coordinates" => $this->coordinates->map(function (Location $coordinate):array{
-                return [$coordinate->getLongitude(),$coordinate->getLatitude()];
-            })
-        ];
+        return new Line( $this->coordinates->first(), $this->coordinates->last() );
     }
 }
