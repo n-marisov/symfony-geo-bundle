@@ -40,5 +40,7 @@ class GeoExtension extends Extension
 
         # Устанавливаем количество знаков после запятой для кодирования полилиний
         $container->setParameter("geo.precision", $config["precision"] ?? 6 );
+
+        dump($container);
     }
 }

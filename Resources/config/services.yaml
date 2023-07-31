@@ -32,8 +32,9 @@ services:
 
    # Калькулятор по умолчанию.
    #Maris\Symfony\Geo\Calculator\GeoCalculator: '@geo.calculator.spherical'
-   Maris\Symfony\Geo\Calculator\GeoCalculator:
-      alias: '@geo.calculator.spherical'
+
+   geo.calculator:
+      alias: Maris\Symfony\Geo\Calculator\GeoCalculator
 
    ########################################################################
    ############################### Декодеры ###############################
