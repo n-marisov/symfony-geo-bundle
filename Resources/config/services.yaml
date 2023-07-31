@@ -69,3 +69,13 @@ services:
       arguments:
          $locationFactory: '@geo.factory.location'
          $encoder: '@geo.encoder.polyline'
+
+
+   ########################################################################
+   ############################### События ################################
+   ########################################################################
+
+
+   Maris\Symfony\Geo\EventListener\EntityUpdateListener:
+      arguments:
+         $precision: '%geo.precision%'
