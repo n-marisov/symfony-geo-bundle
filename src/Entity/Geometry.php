@@ -29,7 +29,7 @@ abstract class Geometry implements IteratorAggregate, Countable, ArrayAccess, Js
     protected static ?ContainerBuilder $calculator = null;
 
 
-    public function getCalculator():?GeoCalculator
+    public static function getCalculator():?GeoCalculator
     {
         $calculator = self::$calculator?->get("geo.calculator");
         if(is_a($calculator,GeoCalculator::class))
