@@ -37,6 +37,8 @@ services:
       factory:
          - Maris\Symfony\Geo\Factory\CalculatorFactory
          - 'createCalculator'
+         - '%geo.ellipsoid%'
+         - '%geo.allowed%'
      # class: Maris\Symfony\Geo\Calculator\SphericalCalculator
      # public: true
 

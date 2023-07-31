@@ -7,8 +7,9 @@ use Maris\Symfony\Geo\Calculator\GeoCalculator;
 
 class CalculatorFactory
 {
-    public static function createCalculator():GeoCalculator
+    public static function createCalculator( ... $args ):GeoCalculator
     {
+        dump($args);
         return new EllipsoidalCalculator();
     }
 }
