@@ -34,17 +34,12 @@ services:
 
    # Калькулятор по умолчанию.
    Maris\Symfony\Geo\Calculator\GeoCalculator:
-      factory:
-         - Maris\Symfony\Geo\Factory\CalculatorFactory
-         - 'createCalculator'
-         - '%geo.ellipsoid%'
-         - '%geo.allowed%'
-     # class: Maris\Symfony\Geo\Calculator\SphericalCalculator
-     # public: true
+      factory: '@Maris\Symfony\Geo\Factory\CalculatorFactory'
 
-   #geo.calculator:
-      #alias: Maris\Symfony\Geo\Calculator\GeoCalculator
-      #public: true
+
+   Maris\Symfony\Geo\Factory\CalculatorFactory:
+      arguments:
+         $calculatorClass: 'Maris\Symfony\Geo\Calculator\EllipsoidalCalculator'
 
    ########################################################################
    ############################### Декодеры ###############################
