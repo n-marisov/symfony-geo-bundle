@@ -28,10 +28,7 @@ class GeoExtension extends Extension
 
 
         # Устанавливаем эллипсоид для сервисов
-        $container->setParameter("geo.calculator",match ( $config["calculator"] ?? "spherical" ){
-            "ellipsoidal" => "@geo.calculator.ellipsoidal",
-            default => "@geo.calculator.spherical"
-        });
+        $container->setParameter("geo.calculator",$config["calculator"] ?? "spherical" );
 
         # Устанавливаем эллипсоид для сервисов
         $container->setParameter("geo.ellipsoid",Ellipsoid::from($config["ellipsoid"]));
